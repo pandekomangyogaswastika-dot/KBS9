@@ -1,0 +1,130 @@
+{
+  "summary": "Completed Phase 21A Quick Wins testing for KBS7 platform migration. Backend APIs fully functional (32/32 tests passed). Frontend testing revealed and fixed critical bug in CMS portfolios schema. All Phase 21A features verified working: DemoAnalyticsPage fix, MediaLibrary dialog improvements, and CMS side-by-side preview (ResourceManager dialog width).",
+  "backend_issues": {
+    "critical_bugs": [],
+    "flaky_endpoints": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "fixed_bugs": [
+      {
+        "component": "CMS schemas.js",
+        "issue": "portfolios, case-studies, and products schemas were defined inside SETTINGS_SCHEMA instead of RESOURCE_SCHEMAS, causing 'Unknown resource: portfolios' error",
+        "file": "/app/frontend/src/features/admin/cms/schemas.js",
+        "fix": "Moved portfolios, case-studies, and products definitions from SETTINGS_SCHEMA (after line 233) back into RESOURCE_SCHEMAS (before closing brace). Removed duplicate definitions.",
+        "fix_priority": "CRITICAL",
+        "status": "FIXED"
+      }
+    ]
+  },
+  "passed_tests": [
+    "Backend: GET /api/health - API healthy",
+    "Backend: GET /api/ - Root endpoint working",
+    "Backend: POST /api/auth/login (admin) - Admin login successful",
+    "Backend: POST /api/auth/login (client) - Client login successful",
+    "Backend: GET /api/auth/me - Auth endpoint working",
+    "Backend: GET /api/services - 7 services found",
+    "Backend: GET /api/cases - 5 cases found",
+    "Backend: GET /api/tech - 16 technologies found",
+    "Backend: GET /api/team - 4 team members found",
+    "Backend: GET /api/faq - 8 FAQs found",
+    "Backend: GET /api/packages - 3 packages found",
+    "Backend: GET /api/legal/privacy-policy - Privacy policy working",
+    "Backend: GET /api/resources - 3 resources found",
+    "Backend: GET /api/home-blocks - 9 home-blocks found",
+    "Backend: GET /api/settings - Settings endpoint working",
+    "Backend: GET /api/admin/stats - Dashboard statistics working",
+    "Backend: GET /api/admin/leads - Leads list working (0 leads)",
+    "Backend: GET /api/admin/cms/services - 7 CMS services",
+    "Backend: GET /api/admin/cms/cases - 5 CMS cases",
+    "Backend: GET /api/admin/cms/home-blocks - 9 items, all published",
+    "Backend: PATCH /api/admin/cms/home-blocks/{id} - Edit working",
+    "Backend: GET /api/admin/cms/testimonials - 4 testimonials",
+    "Backend: GET /api/admin/cms/faq - 8 FAQs",
+    "Backend: GET /api/admin/cms/packages - 3 packages",
+    "Backend: GET /api/admin/cms/resources - 3 resources",
+    "Backend: GET /api/admin/cms/legal - 2 legal pages",
+    "Backend: GET /api/admin/demo-analytics/overview - Demo analytics working (0 requests)",
+    "Backend: GET /api/admin/demo-analytics/requests - Recent requests working (0 items)",
+    "Backend: GET /api/admin/media - Media library working (0 assets)",
+    "Backend: GET /api/admin/media/folders - Folders list working (0 folders)",
+    "Backend: GET /api/admin/cms/portfolios - Portfolios endpoint working (0 items)",
+    "Backend: GET /api/admin/users - Admin users list working (3 users)",
+    "Frontend: Homepage loads with immersive space-themed design (constellation canvas, live telemetry widget)",
+    "Frontend: Login page renders correctly with email and password fields",
+    "Frontend: Admin login successful (admin@kubus.id / Admin#2026)",
+    "Frontend: Admin dashboard accessible at /portal/admin",
+    "Frontend: Demo Analytics Page loads without crash, shows empty state correctly (Phase 21A.1 fix verified)",
+    "Frontend: Media Library 'Folder Baru' button opens Shadcn Dialog (not window.prompt) (Phase 21A.2 fix verified)",
+    "Frontend: Media Library dialog has folder name input field",
+    "Frontend: CMS Portfolio Manager page loads correctly after schema fix",
+    "Frontend: CMS Portfolio Manager shows 'Tambah' (Add) button",
+    "Frontend: CMS Portfolio Manager has Export and Import buttons",
+    "Frontend: Public page /services loads successfully",
+    "Frontend: Public page /portfolio loads successfully",
+    "Frontend: Public page /case-studies loads successfully",
+    "Frontend: Public page /products loads successfully"
+  ],
+  "test_report_links": [
+    "/app/backend/backend_test.py"
+  ],
+  "success_percentage": {
+    "backend": "100% (32/32 tests passed)",
+    "frontend": "100% (all Phase 21A features verified working after bug fix)"
+  },
+  "action_item_for_main_agent": "",
+  "updated_files": [
+    "/app/backend/backend_test.py",
+    "/app/frontend/src/features/admin/cms/schemas.js"
+  ],
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_test_itself": false,
+  "phase_21a_verification": {
+    "21a_1_demo_analytics_fix": {
+      "status": "VERIFIED",
+      "findings": [
+        "DemoAnalyticsPage loads without crash at /portal/admin/demo-analytics",
+        "Page shows empty state correctly with 0 values for all metrics",
+        "No runtime errors or 'Cannot read properties of undefined' errors",
+        "Metrics displayed: Total Requests (0), Last 30 Days (0), Active Sessions (0), Completion Rate (0%)",
+        "Empty states shown: 'Belum ada data permintaan demo' and 'Belum ada permintaan demo terbaru'",
+        "Backend endpoints working: GET /api/admin/demo-analytics/overview and GET /api/admin/demo-analytics/requests"
+      ]
+    },
+    "21a_2_media_library_dialogs": {
+      "status": "VERIFIED",
+      "findings": [
+        "Media Library page loads at /portal/admin/media",
+        "'Folder Baru' (New Folder) button found with data-testid='media-new-folder-button'",
+        "Clicking button opens Shadcn Dialog (not native window.prompt)",
+        "Dialog has data-testid='media-new-folder-dialog'",
+        "Dialog contains folder name input field with data-testid='media-new-folder-input'",
+        "Dialog has Cancel and Create buttons",
+        "Dialog closes properly when Cancel is clicked",
+        "No native window.prompt or window.confirm used (replaced with AlertDialog for delete)"
+      ]
+    },
+    "21a_3_cms_side_by_side_preview": {
+      "status": "VERIFIED",
+      "findings": [
+        "ResourceManager dialog width increased from max-w-3xl to max-w-6xl",
+        "CMS Portfolio Manager page loads correctly at /portal/admin/cms/portfolios",
+        "Page shows 'Portfolio' heading and empty state",
+        "'Tambah' (Add) button present for creating new portfolio items",
+        "Export and Import buttons present",
+        "ResourceForm.jsx has side-by-side preview on desktop (≥lg breakpoint)",
+        "Mobile view (<lg) uses tab toggle between Edit and Preview",
+        "Desktop view shows Edit form on left (60%) and Preview on right (40%) with sticky positioning",
+        "CRITICAL BUG FIXED: portfolios/case-studies/products schemas were incorrectly placed in SETTINGS_SCHEMA instead of RESOURCE_SCHEMAS"
+      ]
+    }
+  },
+  "test_environment": {
+    "backend_url": "https://kbs-system-review-1.preview.emergentagent.com/api",
+    "frontend_url": "https://kbs-system-review-1.preview.emergentagent.com",
+    "admin_credentials": "admin@kubus.id / Admin#2026",
+    "client_credentials": "client@kubus.id / Client#2026"
+  }
+}

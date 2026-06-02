@@ -1,0 +1,60 @@
+# PRD — Kubus Teknologi Indonesia Platform
+
+**Produk:** Immersive space-themed company website + multi-role application portal untuk **Kubus Teknologi Indonesia** (perusahaan IT solutions).
+
+**Status:** Phase 0–16 SELESAI ✅. Platform lengkap: public website sinematik, multi-role portal (admin/staff/client), AI Advisor Claude, assessment module, e-sign, analytics, SEO AI, email notifications, real-time WebSocket notifications, dan Demo Sandbox Engine (pilot KN3 WMS).
+
+---
+
+## Visi
+Website award-grade (referensi UX: oryzo.ai) dengan tema **Space**: bukan sekadar sumber informasi, tapi pengalaman menjelajahi "Kubus Universe". Sekaligus platform: CMS canggih, portal klien & staff, assessment intake, AI advisor (Claude), dan demo interaktif produk.
+
+## Pengguna & Roles
+- **Visitor** — jelajah website, isi assessment (via token), chat AI advisor, coba demo produk (gate form).
+- **Client** — portal: dashboard, timeline project, dokumen, cases, approval, invoice, chat, AI assistant.
+- **Staff** — kelola project/milestone/dokumen, klien, assessment.
+- **Admin** — advanced CMS, user management, project management, leads, analytics, SEO, notifications, demo config.
+
+## Keputusan Produk (dari diskusi user)
+- Bahasa: **Bilingual ID/EN** (toggle, default ID).
+- 3D/animasi: **Balanced** (3D di hero/section kunci + partikel ringan + CSS), wajib fallback & reduced-motion.
+- Konten awal: **placeholder profesional** (diganti user nanti).
+- Auth: **email+password**, RBAC; client/staff dibuat oleh admin/staff (no self-register).
+- Assessment: **template-driven** dikelola CMS; seed 1 template "IT Solution Discovery".
+- AI: **Claude** (Emergent LLM), **grounded** ke konten Kubus; dua permukaan (publik + portal).
+- Demo Sandbox: **full sandbox** — user isi gate form → sesi terisolasi 90 menit → akses demo produk sebagai admin. Pilot: KN3 WMS.
+
+## Roadmap (SSOT operasional = /app/plan.md)
+Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website → 3 Auth+CMS → 4 Assessment → 5 Client Portal → 6 Staff/PM → 7 AI → 9 E-Sign → 10 Analytics → 11 SEO AI → 12 Email/Integrations → 13 Performance → 14 Search → 15 Realtime Notif → 16 Demo Sandbox.
+
+---
+
+## Feature Log
+| Tanggal | Fase | Fitur | Status |
+|---------|------|-------|--------|
+| - | 0 | Governance docs (KTI_00–13), memory layer, ENTITY_REGISTRY, scripts | done ✅ |
+| - | 1 | Core POC: Claude (grounded, 3/3) + immersive Three.js + GSAP/Lenis + fallback | done ✅ |
+| - | 2 | Public Immersive Website: hero 3D, semua section, bilingual ID/EN, 10 halaman, contact→crm_leads, AI Advisor | done ✅ |
+| - | 2.5 | Cinematic redesign V2 (scroll-scrub hero, sticky services, gauges, cases rail) | done ✅ |
+| - | 3 | Auth & RBAC (JWT), Media Library (local storage TD-008), Advanced CMS (schema-driven CRUD) | done ✅ |
+| - | 4 | Assessment Module (token-based, template-driven, PDF export) | done ✅ |
+| - | 5/6 | Client Portal + Staff Portal + Project Management (milestone, dokumen, approval) | done ✅ |
+| - | 7 | AI Assistant Claude (publik + portal, grounded) | done ✅ |
+| - | 9 | E-Sign + Audit Trail (PDF certificate, approval_signatures, approval_audit_logs) | done ✅ |
+| - | 10 | Analytics Dashboard (traffic, leads, projects, revenue charts) | done ✅ |
+| - | 11 | AI Smart SEO (foundation, AI generator, dashboard, visual) | done ✅ |
+| - | 12 | Email Notifications + Integration Settings (SMTP/provider config) | done ✅ |
+| - | 13 | Performance Optimization (cache, GZip, lazy load, compression) | done ✅ |
+| - | 14 | Advanced Search Global (RBAC-safe, multi-entity) | done ✅ |
+| - | 15 | Real-time Notifications WebSocket (bell, toast, multi-portal, event triggers) | done ✅ |
+| - | 16 | Demo Sandbox Engine (KN3 WMS pilot: gate form, session isolation, guided tour, DemoBanner) | done ✅ |
+
+## Backlog / Tier 2 (belum dikerjakan)
+- Dark/Light theme toggle (persistent user preference).
+- Multi-tenant / whitelabel per-client subdomain.
+- Advanced analytics (funnels/cohort/retention).
+- Mobile PWA.
+- Payment gateway aktivasi (Midtrans/Xendit) — config sudah ada.
+- Object storage migration (S3/R2/Cloudflare) — abstraksi sudah ada (TD-008).
+- 4 demo repo lain (menunggu GitHub URL dari user).
+- Admin demo monitoring page — built Phase 16 P3.

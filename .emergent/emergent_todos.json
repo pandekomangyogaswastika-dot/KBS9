@@ -1,0 +1,38 @@
+[
+  {
+    "content": "Clone GitHub repository from pandekomangyogaswastika-dot/KBS8",
+    "status": "completed"
+  },
+  {
+    "content": "Read and study all documents in the repository",
+    "status": "completed"
+  },
+  {
+    "content": "Copy all backend files to /app/backend/",
+    "status": "completed"
+  },
+  {
+    "content": "Copy all frontend files to /app/frontend/",
+    "status": "completed"
+  },
+  {
+    "content": "Copy docs, memory, scripts files",
+    "status": "completed"
+  },
+  {
+    "content": "Install missing dependencies (backend + frontend)",
+    "status": "completed"
+  },
+  {
+    "content": "Setup environment variables (.env)",
+    "status": "completed"
+  },
+  {
+    "content": "Run seed scripts",
+    "status": "completed"
+  },
+  {
+    "content": "Test the application end-to-end",
+    "status": "in_progress"
+  }
+]

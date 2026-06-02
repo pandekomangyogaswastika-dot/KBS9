@@ -1,0 +1,62 @@
+/* ─── Discovery E-Questionnaire — Standalone Design Tokens ───────────────────
+   Brand: Professional, calm, trustworthy. Inspired by enterprise consulting.
+   Decoupled from main ERP styles to avoid leakage.
+*/
+
+:root {
+  --discovery-primary: #0F4C81;
+  --discovery-primary-hover: #0B3D6B;
+  --discovery-accent: #1D7874;
+  --discovery-accent-hover: #155F5C;
+  --discovery-warn: #C77700;
+  --discovery-danger: #B00020;
+  --discovery-success: #2E7D32;
+  --discovery-text: #1A1F2E;
+  --discovery-muted: #6C757D;
+  --discovery-border: #D9DEE5;
+  --discovery-soft: #EEF3F8;
+  --discovery-bg: #F4F6F8;
+  --discovery-bg-deep: #ECF0F4;
+  --discovery-card: #FFFFFF;
+
+  --discovery-shadow-sm: 0 1px 2px rgba(15, 76, 129, 0.04), 0 1px 3px rgba(15, 76, 129, 0.05);
+  --discovery-shadow: 0 4px 14px rgba(15, 76, 129, 0.08), 0 2px 6px rgba(15, 76, 129, 0.04);
+  --discovery-shadow-lg: 0 20px 40px -16px rgba(15, 76, 129, 0.18), 0 8px 20px -10px rgba(15, 76, 129, 0.08);
+
+  --discovery-radius: 14px;
+  --discovery-radius-sm: 10px;
+  --discovery-radius-lg: 22px;
+}
+
+.discovery-root {
+  font-family: "Figtree", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--discovery-text);
+  background-color: var(--discovery-bg);
+  min-height: 100vh;
+  letter-spacing: -0.005em;
+}
+
+.discovery-root *::selection {
+  background-color: rgba(15, 76, 129, 0.18);
+  color: var(--discovery-primary);
+}
+
+/* Subtle texture on body */
+.discovery-bg-grain {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(15, 76, 129, 0.04), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(29, 120, 116, 0.04), transparent 40%);
+}
+
+/* Glass card for floating panels */
+.discovery-glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(217, 222, 229, 0.6);
+  box-shadow: var(--discovery-shadow);
+}
+
+.discovery-print-hide {
+  /* keep for future */
+}
