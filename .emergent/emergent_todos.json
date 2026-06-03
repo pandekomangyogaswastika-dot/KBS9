@@ -1,38 +1,30 @@
 [
   {
-    "content": "Clone GitHub repository from pandekomangyogaswastika-dot/KBS8",
+    "content": "Buat seed template KN3 ERP Discovery (14 domain, ~85 pertanyaan) di KBS",
     "status": "completed"
   },
   {
-    "content": "Read and study all documents in the repository",
+    "content": "Buat ProgressRing component (dark theme KTI)",
     "status": "completed"
   },
   {
-    "content": "Copy all backend files to /app/backend/",
+    "content": "Tambah Dashboard view ke AssessmentTaking (domain cards + overview)",
     "status": "completed"
   },
   {
-    "content": "Copy all frontend files to /app/frontend/",
+    "content": "Tambah Summary/Review view sebelum submit",
     "status": "completed"
   },
   {
-    "content": "Copy docs, memory, scripts files",
+    "content": "Tambah Export PDF button di client taking view",
     "status": "completed"
   },
   {
-    "content": "Install missing dependencies (backend + frontend)",
+    "content": "Update AssessmentTaking dengan 3 views (dashboard/domain/summary)",
     "status": "completed"
   },
   {
-    "content": "Setup environment variables (.env)",
-    "status": "completed"
-  },
-  {
-    "content": "Run seed scripts",
-    "status": "completed"
-  },
-  {
-    "content": "Test the application end-to-end",
-    "status": "completed"
+    "content": "Test semua fitur dengan testing_agent",
+    "status": "in_progress"
   }
 ]

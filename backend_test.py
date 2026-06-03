@@ -204,6 +204,157 @@ class KBS8APITester:
             print(f"   ✅ Found {len(projects)} projects")
         return success
 
+    def test_assessment_templates_list(self):
+        """Test assessment templates list - should include KN3 ERP Discovery"""
+        if not self.admin_token:
+            print("   ⚠️  SKIPPED - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Assessment Templates List",
+            "GET",
+            "/api/assessment/templates",
+            200,
+            token=self.admin_token,
+            description="Fetch assessment templates (should include KN3 ERP Discovery)"
+        )
+        if success:
+            templates = response.get('data', [])
+            print(f"   ✅ Found {len(templates)} templates")
+            # Check for KN3 template
+            kn3_template = None
+            for t in templates:
+                if 'kn3' in t.get('id', '').lower() or 'erp' in str(t.get('name', '')).lower():
+                    kn3_template = t
+                    print(f"   ✅ Found KN3 ERP Discovery template: {t.get('id')}")
+                    print(f"      Domains: {t.get('section_count', 0)}, Questions: {t.get('question_count', 0)}")
+                    self.kn3_template_id = t.get('id')
+                    break
+            if not kn3_template:
+                print(f"   ⚠️  KN3 ERP Discovery template not found in {len(templates)} templates")
+        return success
+
+    def test_create_assessment_session(self):
+        """Test creating assessment session with KN3 template"""
+        if not self.admin_token or not hasattr(self, 'kn3_template_id'):
+            print("   ⚠️  SKIPPED - No admin token or KN3 template ID")
+            return False
+        
+        # Get client user ID first
+        success, response = self.run_test(
+            "Get Client User ID",
+            "GET",
+            "/api/admin/users",
+            200,
+            token=self.admin_token,
+            description="Get client user ID for session creation"
+        )
+        
+        client_user_id = None
+        if success:
+            users = response.get('data', [])
+            for u in users:
+                if u.get('email') == 'client@kubus.id':
+                    client_user_id = u.get('id')
+                    break
+        
+        if not client_user_id:
+            print("   ⚠️  Could not find client user ID")
+            return False
+        
+        success, response = self.run_test(
+            "Create Assessment Session",
+            "POST",
+            "/api/assessment/sessions",
+            201,
+            data={
+                "template_id": self.kn3_template_id,
+                "client_name": "Test Client Company",
+                "client_user_id": client_user_id,
+                "project_name": "KN3 ERP Discovery Test",
+                "contact_person": "Test Contact",
+                "contact_email": "client@kubus.id",
+                "locale": "id"
+            },
+            token=self.admin_token,
+            description="Create new assessment session with KN3 template"
+        )
+        if success:
+            session = response.get('data', {})
+            self.test_session_id = session.get('id')
+            self.test_session_token = session.get('token')
+            print(f"   ✅ Session created: {self.test_session_id}")
+            print(f"   Token: {self.test_session_token}")
+            print(f"   Share URL: {session.get('share_url')}")
+        return success
+
+    def test_client_assessments_list(self):
+        """Test client can see their assessments"""
+        if not self.client_token:
+            print("   ⚠️  SKIPPED - No client token")
+            return False
+        
+        success, response = self.run_test(
+            "Client Assessments List",
+            "GET",
+            "/api/assessment/my",
+            200,
+            token=self.client_token,
+            description="Client fetches their assigned assessments"
+        )
+        if success:
+            assessments = response.get('data', [])
+            print(f"   ✅ Found {len(assessments)} assessments for client")
+            if assessments:
+                for a in assessments:
+                    print(f"      - {a.get('client_name')} ({a.get('status')})")
+        return success
+
+    def test_session_detail(self):
+        """Test getting session detail with 3-view structure"""
+        if not self.admin_token or not hasattr(self, 'test_session_id'):
+            print("   ⚠️  SKIPPED - No admin token or session ID")
+            return False
+        
+        success, response = self.run_test(
+            "Get Session Detail",
+            "GET",
+            f"/api/assessment/sessions/{self.test_session_id}/detail",
+            200,
+            token=self.admin_token,
+            description="Get session detail (should show domains for 3 views)"
+        )
+        if success:
+            data = response.get('data', {})
+            template = data.get('template', {})
+            domains = template.get('domains', [])
+            progress = data.get('progress', {})
+            print(f"   ✅ Session detail retrieved")
+            print(f"      Template: {template.get('name', {}).get('id', 'N/A')}")
+            print(f"      Domains: {len(domains)}")
+            print(f"      Progress: {progress.get('percent', 0)}%")
+            if domains:
+                print(f"      First domain: {domains[0].get('title', {}).get('id', 'N/A')}")
+        return success
+
+    def test_export_pdf(self):
+        """Test PDF export functionality"""
+        if not hasattr(self, 'test_session_token'):
+            print("   ⚠️  SKIPPED - No session token")
+            return False
+        
+        # Note: We're just testing if the endpoint responds, not downloading the actual PDF
+        success, response = self.run_test(
+            "Export PDF",
+            "GET",
+            f"/api/assessment/{self.test_session_token}/export",
+            200,
+            description="Test PDF export endpoint"
+        )
+        if success:
+            print(f"   ✅ PDF export endpoint accessible")
+        return success
+
     def test_public_content_endpoints(self):
         """Test various public content endpoints"""
         endpoints = [
@@ -286,6 +437,21 @@ def main():
         tester.test_client_projects()
     else:
         print("⚠️  Skipping client tests - login failed")
+
+    print("\n📋 PHASE 5: Assessment Module (KN3 ERP Discovery)")
+    print("-" * 60)
+    if admin_login_success:
+        tester.test_assessment_templates_list()
+        tester.test_create_assessment_session()
+        tester.test_session_detail()
+        tester.test_export_pdf()
+    else:
+        print("⚠️  Skipping assessment tests - admin login failed")
+    
+    if client_login_success:
+        tester.test_client_assessments_list()
+    else:
+        print("⚠️  Skipping client assessment tests - client login failed")
 
     # Print summary
     all_passed = tester.print_summary()
