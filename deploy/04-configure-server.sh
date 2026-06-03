@@ -47,8 +47,9 @@ systemctl --no-pager --lines=10 status kubus-backend || true
 echo "[*] Membuat konfigurasi Nginx..."
 cat > /etc/nginx/sites-available/kubus <<EOF
 server {
-    listen 80;
-    server_name ${DOMAIN};
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name ${DOMAIN} _;
     client_max_body_size 50M;
 
     root ${REPO_DIR}/frontend/build;
@@ -70,7 +71,9 @@ server {
 EOF
 
 ln -sf /etc/nginx/sites-available/kubus /etc/nginx/sites-enabled/kubus
+# Hapus semua konfigurasi default Nginx agar tidak menutupi aplikasi
 rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/conf.d/default.conf
 
 # Pastikan Nginx (www-data) bisa membaca build folder
 chmod -R o+rX "${REPO_DIR}/frontend/build"
