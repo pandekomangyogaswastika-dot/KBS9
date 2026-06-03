@@ -89,8 +89,8 @@
     }
   },
   "test_environment": {
-    "backend_url": "https://kbs9-production.preview.emergentagent.com/api",
-    "frontend_url": "https://kbs9-production.preview.emergentagent.com",
+    "backend_url": "https://farm-stack-demo-1.preview.emergentagent.com/api",
+    "frontend_url": "https://farm-stack-demo-1.preview.emergentagent.com",
     "admin_credentials": "admin@kubus.id / Admin#2026",
     "test_lead": "yusuf.prasetyo@manufaktur.id (ID: 1a6459a8-b9d2-4275-8fff-ac77db16b4a1)",
     "converted_client_credentials": "yusuf.prasetyo@manufaktur.id / Coba#12345"

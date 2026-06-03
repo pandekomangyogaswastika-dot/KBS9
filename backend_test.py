@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 
 class KBS8APITester:
-    def __init__(self, base_url="https://kbs9-production.preview.emergentagent.com"):
+    def __init__(self, base_url="https://farm-stack-demo-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.admin_token = None
         self.client_token = None
@@ -499,7 +499,7 @@ def main():
     print("="*60)
     print("🚀 KBS8 Platform - Backend API Testing")
     print("="*60)
-    print(f"Base URL: https://kbs9-production.preview.emergentagent.com")
+    print(f"Base URL: https://farm-stack-demo-1.preview.emergentagent.com")
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*60)
 

@@ -35,7 +35,7 @@ export default function SEOHead({
   const location = useLocation();
   const { i18n } = useTranslation();
   
-  const BASE_URL = "https://kbs9-production.preview.emergentagent.com";
+  const BASE_URL = "https://farm-stack-demo-1.preview.emergentagent.com";
   const SITE_NAME = "Kubus Teknologi Indonesia";
   const DEFAULT_IMAGE = `${BASE_URL}/og-image.png`; // TODO: Add default OG image to public folder
   
@@ -135,8 +135,8 @@ export const createOrganizationSchema = () => ({
   "@type": "Organization",
   name: "Kubus Teknologi Indonesia",
   alternateName: "KTI",
-  url: "https://kbs9-production.preview.emergentagent.com",
-  logo: "https://kbs9-production.preview.emergentagent.com/logo.png",
+  url: "https://farm-stack-demo-1.preview.emergentagent.com",
+  logo: "https://farm-stack-demo-1.preview.emergentagent.com/logo.png",
   description: "Solusi teknologi enterprise untuk transformasi digital bisnis Anda",
   address: {
     "@type": "PostalAddress",
@@ -158,12 +158,12 @@ export const createWebsiteSchema = () => ({
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Kubus Teknologi Indonesia",
-  url: "https://kbs9-production.preview.emergentagent.com",
+  url: "https://farm-stack-demo-1.preview.emergentagent.com",
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://kbs9-production.preview.emergentagent.com/search?q={search_term_string}",
+      urlTemplate: "https://farm-stack-demo-1.preview.emergentagent.com/search?q={search_term_string}",
     },
     "query-input": "required name=search_term_string",
   },
@@ -189,7 +189,7 @@ export const createArticleSchema = (article) => ({
   "@type": "BlogPosting",
   headline: article.title,
   description: article.excerpt || article.description,
-  image: article.image || "https://kbs9-production.preview.emergentagent.com/og-image.png",
+  image: article.image || "https://farm-stack-demo-1.preview.emergentagent.com/og-image.png",
   datePublished: article.created_at,
   dateModified: article.updated_at || article.created_at,
   author: {
@@ -201,7 +201,7 @@ export const createArticleSchema = (article) => ({
     name: "Kubus Teknologi Indonesia",
     logo: {
       "@type": "ImageObject",
-      url: "https://kbs9-production.preview.emergentagent.com/logo.png",
+      url: "https://farm-stack-demo-1.preview.emergentagent.com/logo.png",
     },
   },
 });

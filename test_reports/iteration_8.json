@@ -122,8 +122,8 @@
     }
   },
   "test_environment": {
-    "backend_url": "https://kbs9-production.preview.emergentagent.com/api",
-    "frontend_url": "https://kbs9-production.preview.emergentagent.com",
+    "backend_url": "https://farm-stack-demo-1.preview.emergentagent.com/api",
+    "frontend_url": "https://farm-stack-demo-1.preview.emergentagent.com",
     "admin_credentials": "admin@kubus.id / Admin#2026",
     "client_credentials": "client@kubus.id / Client#2026"
   }
