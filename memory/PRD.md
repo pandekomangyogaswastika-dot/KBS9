@@ -48,6 +48,32 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 | - | 14 | Advanced Search Global (RBAC-safe, multi-entity) | done ✅ |
 | - | 15 | Real-time Notifications WebSocket (bell, toast, multi-portal, event triggers) | done ✅ |
 | - | 16 | Demo Sandbox Engine (KN3 WMS pilot: gate form, session isolation, guided tour, DemoBanner) | done ✅ |
+| 2026-06 | 17 | Post-Deploy Bug Fixes & New Features (see changelog below) | done ✅ |
+
+---
+
+## Changelog - Phase 17 (Juni 2026)
+
+### Bug Fixes
+- **CMS Double Data**: System Recovery page + Dedup endpoint (hapus duplikat per collection berdasarkan slug/name/key)
+- **Assessment [object Object]**: Fix `TemplateEditorV2.jsx` — extract string dari `template.description` dict  
+- **ShowIfBuilder blank dropdown**: Fix type normalization (single_choice→select, multi_choice→multiselect)
+- **Template tidak muncul di assign dropdown**: Hapus filter `.published` di `ClientDetailPage.jsx` agar semua template tampil
+- **Home Sections kosong di CMS**: `seed_home_blocks_db` ditambahkan ke startup server (9 blocks)
+- **Demo App Slug free text → dropdown**: `schemas.js` type diubah ke select + `FieldInput.jsx` support select type
+- **Template published flag migration**: Migrasi di startup memastikan semua seeded templates `published: True`
+- **Excel route ordering**: `/templates/excel-template` dipindah sebelum `/templates/{template_id}` di FastAPI
+
+### New Features  
+- **ERP & RFID Discovery Questionnaire** (KN3): Template 14 domain, 82 pertanyaan di-seed otomatis saat startup
+- **Excel Import Assessment**: `POST /api/assessment/templates/import-excel` + tombol UI "Import Excel" + download "Template Excel"
+- **System Recovery Page** (`/portal/admin/recovery`):
+  - 16 CMS collections exportable sebagai ZIP/JSON
+  - 3 strategi restore: add_missing, replace_all, replace_collection (DESTRUCTIVE)
+  - Dedup data duplikat per collection
+  - Backend: `/api/admin/recovery/{collections,export,import,dedup}`
+
+---
 
 ## Backlog / Tier 2 (belum dikerjakan)
 - Dark/Light theme toggle (persistent user preference).
