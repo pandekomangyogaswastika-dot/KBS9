@@ -136,7 +136,7 @@ export default function AssessmentClient() {
     );
   }
 
-  const domains = template.domains || [];
+  const domains = template.sections || template.domains || [];
   const answersMap = answers;
   const visibleOf = (d) => (d.questions || []).filter((q) => evaluateShowIf(q.show_if, answersMap));
   const domainProgress = (d) => (progress?.domains || []).find((x) => x.domain_id === d.id) || { answered: 0, total: visibleOf(d).length, percent: 0, status: "not_started" };
@@ -279,16 +279,18 @@ function Summary({ t, locale, domains, visibleOf, answers, attachments, progress
     const a = answers[q.id];
     if (!a || a.skipped) return <span className="text-white/35">—</span>;
     const v = a.value;
-    if (q.type === "single_choice") {
+    // Handle both old types (single_choice, multi_choice, yes_no) and
+    // normalized types from TemplateEditorV2 (select, multiselect, yesno)
+    if (q.type === "single_choice" || q.type === "select") {
       if (v === OTHER) return `${t("assess.other")}: ${a.other_text || ""}`;
       const o = (q.options || []).find((x) => x.value === v); return o ? loc(o.label, locale) : (v ?? "—");
     }
-    if (q.type === "multi_choice") {
+    if (q.type === "multi_choice" || q.type === "multiselect") {
       const arr = Array.isArray(v) ? v : [];
       return arr.map((val) => val === OTHER ? `${t("assess.other")}: ${a.other_text || ""}` : (loc((q.options || []).find((x) => x.value === val)?.label, locale) || val)).join(", ") || "—";
     }
-    if (q.type === "yes_no") return v === true ? t("assess.yes") : v === false ? t("assess.no") : "—";
-    if (q.type === "scale_1_5") return v ? `${v} / 5` : "—";
+    if (q.type === "yes_no" || q.type === "yesno") return v === true ? t("assess.yes") : v === false ? t("assess.no") : "—";
+    if (q.type === "scale_1_5" || q.type === "scale") return v ? `${v} / 5` : "—";
     return v ?? "—";
   };
   return (
@@ -304,7 +306,7 @@ function Summary({ t, locale, domains, visibleOf, answers, attachments, progress
               <dl className="space-y-2.5">
                 {vq.map((q) => (
                   <div key={q.id} className="grid gap-1 border-b border-white/6 pb-2.5 last:border-0 sm:grid-cols-2">
-                    <dt className="text-xs text-[color:var(--kti-text-dim)]">{loc(q.prompt, locale)}</dt>
+                    <dt className="text-xs text-[color:var(--kti-text-dim)]">{loc(q.text || q.prompt, locale)}</dt>
                     <dd className="text-sm text-white">{renderVal(q)}{(attachments[q.id] || []).length ? <span className="ml-2 text-xs text-[#73D1AD]">📎 {(attachments[q.id] || []).length}</span> : null}</dd>
                   </div>
                 ))}

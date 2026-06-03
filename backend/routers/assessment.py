@@ -68,17 +68,18 @@ class SectionIn(BaseModel):
 
 class TemplateIn(BaseModel):
     name: dict  # {"id": "...", "en": "..."}
-    description: dict | None = None
+    description: str | dict | None = None  # accepts string (TemplateEditorV2 sends str) or dict
     category: str = "general"  # general|it_maturity|security|digital_ops|custom
     sections: list[SectionIn] = []
     locale_default: str = "id"
 
 class TemplateUpdate(BaseModel):
     name: dict | None = None
-    description: dict | None = None
+    description: str | dict | None = None  # accepts string (TemplateEditorV2 sends str) or dict
     category: str | None = None
     sections: list[SectionIn] | None = None
     locale_default: str | None = None
+    published: bool | None = None  # explicit publish toggle (used by TemplateEditorV2 on save)
 
 
 @router.get("/templates")
@@ -163,8 +164,8 @@ async def update_template(template_id: str, payload: TemplateUpdate, user=Depend
     doc = await db.assessment_templates.find_one({"id": template_id, "voided": {"$ne": True}})
     if not doc:
         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "Template tidak ditemukan"})
-    if doc.get("published"):
-        raise HTTPException(status_code=409, detail={"code": "PUBLISHED", "message": "Template sudah dipublish. Unpublish terlebih dahulu untuk mengedit."})
+    # If template is published and content is being changed, auto-unpublish
+    was_published = bool(doc.get("published") or doc.get("is_published"))
 
     updates: dict[str, Any] = {"updated_at": now_iso()}
     if payload.name is not None:
@@ -189,6 +190,13 @@ async def update_template(template_id: str, payload: TemplateUpdate, user=Depend
                 })
             sections.append({"id": sec_id, "title": sec.title, "description": sec.description, "color": sec.color, "icon": sec.icon, "questions": questions})
         updates["sections"] = sections
+        # Content changed: if was published, unpublish so admin can review before re-publishing
+        if was_published:
+            updates["published"] = False
+            updates["is_published"] = False
+    elif payload.published is not None:
+        updates["published"] = payload.published
+        updates["is_published"] = payload.published
 
     await db.assessment_templates.update_one({"id": template_id}, {"$set": updates})
     updated = await db.assessment_templates.find_one({"id": template_id})

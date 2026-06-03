@@ -1,0 +1,136 @@
+{
+  "summary": "Iteration 17: Full assessment flow E2E testing. Found and fixed 8 critical bugs - most were in the public assessment client flow (assessmentApi.js wrong paths, missing type handlers, wrong question field names). All flows now work end-to-end: template edit → toggle publish → assign → client fills → auto-save → submit → admin sees result → PDF export.",
+
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "PUT /api/assessment/templates/{template_id}",
+        "issue": "TemplateUpdate model missing 'published' field → AttributeError when sending description-only updates (sections=None triggered elif payload.published is not None which crashed with AttributeError)",
+        "priority": "CRITICAL",
+        "status": "FIXED in /app/backend/routers/assessment.py"
+      },
+      {
+        "endpoint": "PUT/POST /api/assessment/templates",
+        "issue": "TemplateIn.description and TemplateUpdate.description only accepted dict but TemplateEditorV2 sends string → 422 Validation Error on every template save via the frontend editor",
+        "priority": "CRITICAL",
+        "status": "FIXED: changed to str | dict | None"
+      }
+    ],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "assessmentApi.js",
+        "issue": "ALL 3 public assessment API paths were wrong (used session-based /sessions/{token} paths instead of public /{token} paths). loadSession used GET /assessment/sessions/{token} → 405 Method Not Allowed. saveAnswers used PATCH (should be POST). pdfUrl used /export.pdf (should be /export)",
+        "selector": "assessmentApi.js",
+        "priority": "CRITICAL",
+        "status": "FIXED: corrected all paths to use public token-based endpoints"
+      },
+      {
+        "component": "AssessmentClient.jsx line 139",
+        "issue": "const domains = template.domains || [] — non-KN3 templates use 'sections' field not 'domains'. Domain cards never showed for non-KN3 templates.",
+        "selector": "AssessmentClient.jsx",
+        "priority": "CRITICAL",
+        "status": "FIXED: template.sections || template.domains || []"
+      },
+      {
+        "component": "AssessmentQuestion.jsx line 90",
+        "issue": "Uses q.prompt for question text label — KN3 uses 'prompt' but non-KN3 templates use 'text'. Question text empty for non-KN3 templates.",
+        "selector": "AssessmentQuestion.jsx",
+        "priority": "CRITICAL",
+        "status": "FIXED: q.text || q.prompt"
+      },
+      {
+        "component": "AssessmentQuestion.jsx type handlers",
+        "issue": "Only handled old types: single_choice, multi_choice, yes_no, scale_1_5. Missing handlers for normalized types: select, multiselect, yesno, textarea, scale. 'select' and 'textarea' fell to generic text input → no options rendered for select questions.",
+        "selector": "AssessmentQuestion.jsx",
+        "priority": "CRITICAL",
+        "status": "FIXED: added handlers for all normalized types"
+      },
+      {
+        "component": "AssessmentClient.jsx Summary component line 307",
+        "issue": "Summary shows q.prompt for question label — same issue as AssessmentQuestion. Non-KN3 question labels empty in summary.",
+        "selector": "AssessmentClient.jsx Summary",
+        "priority": "HIGH",
+        "status": "FIXED: q.text || q.prompt"
+      },
+      {
+        "component": "AssessmentClient.jsx Summary renderVal",
+        "issue": "renderVal only handled: single_choice, multi_choice, yes_no, scale_1_5. Missing select, multiselect, yesno, scale → summary showed raw values (e.g. 'manufacturing') instead of labels ('Manufaktur').",
+        "selector": "AssessmentClient.jsx renderVal",
+        "priority": "HIGH",
+        "status": "FIXED: added handlers for all normalized types"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Public assessment deleteAttachment",
+        "issue": "assessmentApi.deleteAttachment calls DELETE /assessment/{token}/attachments/{attId} but this endpoint doesn't exist in backend (only auth-based DELETE /sessions/{session_id}/attachments/{attId} exists). Attachment deletion in public flow will fail.",
+        "affected_selectors": ["assessmentApi.deleteAttachment"],
+        "status": "NOT FIXED - needs backend to add public token-based attachment delete OR restrict to auth-only in UI"
+      },
+      {
+        "flow": "TemplateEditorV2 description field",
+        "issue": "TemplateEditorV2 sends description as string, while the correct format is dict {id:..., en:...}. Backend fixed to accept both, but frontend should also be fixed for data consistency.",
+        "affected_selectors": ["TemplateEditorV2.jsx handleSave"],
+        "status": "PARTIALLY FIXED - backend accepts string now, but frontend ideally should send dict"
+      }
+    ],
+    "design_issues": []
+  },
+
+  "test_report_links": [
+    "/app/backend/tests/test_assessment_flow_iter17.py",
+    "/app/test_reports/pytest/pytest_results_iter17.xml"
+  ],
+
+  "action_items": [
+    "Fix TemplateEditorV2.jsx handleSave to send description as dict {id: cat, en: cat} instead of string (for consistency with TemplateIn model design)",
+    "Add public token-based DELETE /api/assessment/{token}/attachments/{attId} endpoint in backend, OR remove delete attachment functionality from AssessmentClient component",
+    "Review all other question-type consumers in codebase to ensure they also handle both old (single_choice, yes_no, multi_choice) and new normalized (select, yesno, multiselect) type names"
+  ],
+
+  "critical_code_review_comments": [
+    "AssessmentClient.jsx: The 'domains' variable should use template.sections || template.domains to handle both template formats consistently. Applied fix in this iteration.",
+    "assessmentApi.js: All public assessment API paths were pointing to session-based (auth) endpoints. This completely broke the public assessment taking flow. Root cause: the API was refactored at some point but assessmentApi.js was not updated.",
+    "AssessmentQuestion.jsx + AssessmentClient.jsx Summary: Both use question.prompt for text display but only KN3 template uses 'prompt'. All other templates use 'text'. Both places needed q.text || q.prompt.",
+    "Type handling is duplicated between AssessmentQuestion.jsx and Summary's renderVal — consider extracting to a shared utility function.",
+    "TemplateUpdate pydantic model was missing 'published' field despite the update handler trying to access payload.published. This should have been caught in code review."
+  ],
+
+  "updated_files": [
+    "/app/backend/routers/assessment.py",
+    "/app/frontend/src/features/assessment/assessmentApi.js",
+    "/app/frontend/src/features/assessment/AssessmentClient.jsx",
+    "/app/frontend/src/features/assessment/AssessmentQuestion.jsx",
+    "/app/backend/tests/test_assessment_flow_iter17.py"
+  ],
+
+  "success_rate": {
+    "backend": "100% (23/23 tests passed)",
+    "frontend": "95% (all critical flows working; minor deleteAttachment endpoint missing for public flow)"
+  },
+
+  "seed_data_creation": "Created and deleted test sessions (TEST_Client_Iter17 x4) during testing. Cleaned up. Submitted 1 'Client Demo / Kebutuhan Sistem Informasi' session as part of E2E test (status=submitted, token=98918948-da10-4ab4-a418-1df35b915a84).",
+
+  "retest_needed": false,
+
+  "should_main_agent_self_test": true,
+
+  "context_for_next_testing_agent": "All major assessment flow bugs have been fixed in this iteration. The public assessment flow (token-based via /assessment/:token) is now fully working. Key files changed: assessmentApi.js (all paths), AssessmentClient.jsx (domains field, Summary renderVal, q.text||q.prompt), AssessmentQuestion.jsx (type handlers, q.text||q.prompt), assessment.py backend (TemplateUpdate model). Remaining issues: (1) deleteAttachment public endpoint missing, (2) TemplateEditorV2 sends description as string not dict. The KN3 template (82 questions, 14 domains) exists and is published. Template editing (edit → auto-unpublish → toggle publish) works correctly. Backend test file: /app/backend/tests/test_assessment_flow_iter17.py covers full flow.",
+
+  "rca_of_issues": {
+    "assessmentApi_wrong_paths": {
+      "root_cause": "The assessmentApi.js was written/updated to use auth-based session endpoints (/assessment/sessions/{token}) but the public assessment flow should use token-based endpoints (/assessment/{token}). Likely a refactoring where the API route structure changed but assessmentApi.js was not updated.",
+      "reproduction": "Navigate to /assessment/{any_valid_token} - page shows 'Link Tidak Valid' error",
+      "mitigation": "Fixed all 4 functions in assessmentApi.js to use correct public endpoints"
+    },
+    "template_update_crash": {
+      "root_cause": "update_template handler had elif payload.published is not None but TemplateUpdate Pydantic model didn't define published field. When sections=None (description-only update), the elif branch was reached and accessed undefined attribute.",
+      "reproduction": "PUT /api/assessment/templates/{id} with only {description: 'text'} - returns 500",
+      "mitigation": "Added published: bool | None = None to TemplateUpdate model"
+    }
+  }
+}

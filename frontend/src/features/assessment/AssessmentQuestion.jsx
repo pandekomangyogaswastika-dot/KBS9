@@ -28,7 +28,9 @@ export default function AssessmentQuestion({ index, question, answer, lang, lock
   };
 
   let control = null;
-  if (type === "single_choice") {
+  // Handle both old types (single_choice, multi_choice, yes_no, text_long) and
+  // normalized types from TemplateEditorV2 (select, multiselect, yesno, textarea)
+  if (type === "single_choice" || type === "select") {
     control = (
       <div className="grid gap-2 sm:grid-cols-2">
         {opts.map((o) => (
@@ -38,7 +40,7 @@ export default function AssessmentQuestion({ index, question, answer, lang, lock
         ))}
       </div>
     );
-  } else if (type === "multi_choice") {
+  } else if (type === "multi_choice" || type === "multiselect") {
     const arr = Array.isArray(a.value) ? a.value : [];
     const toggle = (v) => {
       let next = arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -59,14 +61,14 @@ export default function AssessmentQuestion({ index, question, answer, lang, lock
         </div>
       </div>
     );
-  } else if (type === "yes_no") {
+  } else if (type === "yes_no" || type === "yesno") {
     control = (
       <div className="flex gap-2">
         <button type="button" disabled={locked} data-testid={`assessment-option-${question.id}-yes`} onClick={() => update({ value: true, skipped: false })} className={`${pill} flex-1 text-center ${a.value === true ? pillOn : pillOff}`}>{t("assess.yes")}</button>
         <button type="button" disabled={locked} data-testid={`assessment-option-${question.id}-no`} onClick={() => update({ value: false, skipped: false })} className={`${pill} flex-1 text-center ${a.value === false ? pillOn : pillOff}`}>{t("assess.no")}</button>
       </div>
     );
-  } else if (type === "scale_1_5") {
+  } else if (type === "scale_1_5" || type === "scale") {
     control = (
       <div className="flex gap-2">
         {[1, 2, 3, 4, 5].map((n) => (
@@ -76,18 +78,20 @@ export default function AssessmentQuestion({ index, question, answer, lang, lock
     );
   } else if (type === "number") {
     control = <input type="number" disabled={locked} value={a.value ?? ""} onChange={(e) => update({ value: e.target.value === "" ? null : Number(e.target.value), skipped: false })} className={inputCls} />;
-  } else if (type === "text_long") {
+  } else if (type === "text_long" || type === "textarea") {
     control = <textarea rows={3} disabled={locked} value={a.value ?? ""} onChange={(e) => update({ value: e.target.value, skipped: false })} className={inputCls} />;
   } else {
+    // Default: text input (handles "text", "date", and any unknown types)
     control = <input disabled={locked} value={a.value ?? ""} onChange={(e) => update({ value: e.target.value, skipped: false })} className={inputCls} />;
   }
 
-  const showOther = (type === "single_choice" && a.value === OTHER) || (type === "multi_choice" && Array.isArray(a.value) && a.value.includes(OTHER));
+  const showOther = (type === "single_choice" || type === "select") && a.value === OTHER ||
+    (type === "multi_choice" || type === "multiselect") && Array.isArray(a.value) && a.value.includes(OTHER);
 
   return (
     <div className="rounded-[var(--kti-radius-card)] border border-white/10 bg-white/[0.035] p-5" data-testid={ASSESS.question} id={`q-${question.id}`}>
       <div className="mb-3 flex items-start justify-between gap-3">
-        <p className="text-sm font-medium leading-relaxed text-white"><span className="text-[color:var(--kti-text-faint)]">{index}. </span>{loc(question.prompt, lang)}</p>
+        <p className="text-sm font-medium leading-relaxed text-white"><span className="text-[color:var(--kti-text-faint)]">{index}. </span>{loc(question.text || question.prompt, lang)}</p>
         {loc(question.help, lang) ? (
           <button type="button" onClick={() => setShowHelp((s) => !s)} className="kti-focus shrink-0 text-white/40 hover:text-white" aria-label="help"><HelpCircle className="size-4" /></button>
         ) : null}

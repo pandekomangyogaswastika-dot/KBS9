@@ -577,7 +577,7 @@ export default function TemplateEditorV2({ template, onClose, onSaved }) {
       };
       if (template?.id) {
         await api.put(`/assessment/templates/${template.id}`, payload);
-        toast.success("Template diperbarui");
+        toast.success(template?.published ? "Template diperbarui & di-unpublish (publish ulang untuk aktifkan)" : "Template diperbarui");
       } else {
         await api.post("/assessment/templates", payload);
         toast.success("Template dibuat");
