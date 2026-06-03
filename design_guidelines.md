@@ -1,422 +1,421 @@
 {
-  "design_system_name": "Kubus Teknologi Indonesia — V2 Cosmic Cinematic Glass (Content Expansion)",
-  "version": "2.1",
-  "brand_attributes": [
-    "cinematic",
-    "premium",
-    "technical/HUD",
-    "trustworthy enterprise",
-    "space-cosmic",
-    "glassmorphic",
-    "scroll-storytelling",
-    "content-system-first",
-    "CMS-friendly"
-  ],
-  "global_rules": {
-    "theme": "Default dark theme only. No light theme variants.",
-    "contrast": "All text must meet WCAG AA against near-black/media backdrops. Use overlays to guarantee legibility.",
-    "bilingual": "Layouts must tolerate ID/EN length variance (±35%). Avoid fixed widths for nav items and CTAs.",
-    "gradients": {
-      "restriction": "Use gradients only as large background accents/overlays (<=20% viewport). Never on text-heavy reading areas or small UI elements (<100px). Never stack multiple gradients in same viewport.",
-      "allowed": [
-        "hero/section background overlays",
-        "decorative aurora glows behind media",
-        "large CTA background only (subtle)"
-      ]
-    },
-    "testing": "All interactive and key informational elements MUST include data-testid (kebab-case, role-based).",
-    "file_convention": "Project uses .js (not .tsx). Provide JS scaffolds only.",
-    "content_system": {
-      "must_be_cms_driven": true,
-      "block_based": "All Portfolio/Case Study/Product pages render from a template + ordered blocks array.",
-      "non_technical_admin": "Block builder must be understandable without dev knowledge: clear labels, previews, and safe defaults."
-    }
+  "brand_attributes": {
+    "tone": ["trustworthy", "technical", "calm", "space-grade precision"],
+    "ux_principles": [
+      "Clarity > completeness in sidebar (progressive disclosure)",
+      "Group by job-to-be-done, not internal org chart",
+      "Keep CMS scannable: Pages vs Blocks vs Collections",
+      "Minimize scroll in nav; prefer collapsible groups",
+      "Role-appropriate language for client portal"
+    ]
   },
-  "inspiration_refs": {
-    "public_site_patterns": [
-      {
-        "name": "shadcn blocks — gallery grid with sidebar",
-        "why": "Matches portfolio index: grid + filter sidebar + clean density.",
-        "source": "https://www.shadcn.io/blocks/gallery-grid-with-sidebar"
+  "design_tokens": {
+    "note": "DO NOT change KTI branding colors; only refine structure + usage. Keep background #03040A, indigo #7C68E1, teal #73D1AD.",
+    "css_custom_properties": {
+      "colors": {
+        "--kti-space-975": "#03040A",
+        "--kti-indigo": "#7C68E1",
+        "--kti-teal": "#73D1AD",
+        "--kti-text-strong": "#E8EAF2",
+        "--kti-text-dim": "#9AA0B5",
+        "--kti-space-900": "#0B0D17",
+        "--kti-glass-bg": "rgba(255,255,255,0.06)",
+        "--kti-glass-border": "rgba(255,255,255,0.12)",
+        "--kti-ring": "rgba(124, 104, 225, 0.55)",
+        "--kti-success": "#73D1AD",
+        "--kti-warning": "#F2C879",
+        "--kti-danger": "#FF5C7A"
       },
-      {
-        "name": "shadcn blocks — dialog reorder items",
-        "why": "Matches CMS block reorder UX and drop indicators.",
-        "source": "https://www.shadcn.io/blocks/dialog-reorder-items"
+      "radius": {
+        "--radius": "0.875rem",
+        "--kti-radius-soft": "14px",
+        "--kti-radius-card": "20px",
+        "--kti-radius-pill": "999px"
       },
-      {
-        "name": "Tiptap Notion-like editor template",
-        "why": "Interaction model for block-based editing (slash insert, block handles).",
-        "source": "https://tiptap.dev/docs/ui-components/templates/notion-like-editor"
+      "shadows": {
+        "--kti-glass-shadow": "0 18px 60px rgba(0, 0, 0, 0.55)",
+        "--kti-glass-shadow-hover": "0 26px 80px rgba(0, 0, 0, 0.62)",
+        "--kti-glow-indigo": "0 0 0 1px rgba(124, 104, 225, 0.18), 0 0 40px rgba(124, 104, 225, 0.18)",
+        "--kti-glow-teal": "0 0 0 1px rgba(115, 209, 173, 0.16), 0 0 44px rgba(115, 209, 173, 0.14)"
       },
-      {
-        "name": "GSAP ScrollTrigger",
-        "why": "Already in stack; use for pinned rails, crossfades, and subtle parallax.",
-        "source": "https://gsap.com/docs/v3/Plugins/ScrollTrigger/"
+      "typography": {
+        "--font-body": "Inter, system-ui, sans-serif",
+        "--font-display": "Space Grotesk, Inter, system-ui, sans-serif",
+        "--font-hud": "Space Grotesk, ui-monospace, SFMono-Regular, monospace"
       }
+    },
+    "tailwind_usage_notes": [
+      "Use existing dark tokens from index.css; prefer bg-[color:var(--kti-space-950)] / text-[color:var(--kti-text-strong)]",
+      "Avoid large gradients; if needed, only subtle aurora overlay (already defined as --kti-aurora-accent) and keep it decorative",
+      "No 'transition-all'; use transition-colors, transition-opacity, transition-shadow"
     ]
   },
   "typography": {
-    "font_loading": {
-      "google_fonts": [
-        "Space Grotesk (display)",
-        "Sora (body)",
-        "Chakra Petch (mono/HUD)"
-      ],
-      "recommendation": {
-        "display": {
-          "name": "Space Grotesk",
-          "usage": "All page titles, section headings, product names. Weight 600–700."
-        },
-        "body": {
-          "name": "Sora",
-          "usage": "Paragraphs, descriptions, CMS helper text. Weight 400–500."
-        },
-        "mono": {
-          "name": "Chakra Petch",
-          "usage": "Tags, metrics labels, filter chips, block type labels. Weight 500–600."
-        }
-      }
+    "fonts": {
+      "body": "Inter (existing constraint)",
+      "display": "Space Grotesk (existing constraint)",
+      "mono_labels": "Space Grotesk for HUD labels (existing constraint)"
     },
-    "text_size_hierarchy_tailwind": {
-      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-[-0.04em] leading-[1.02] font-bold",
-      "h2": "text-base md:text-lg text-[color:var(--kti-text-dim)] leading-relaxed",
-      "section_title": "text-2xl sm:text-3xl tracking-[-0.02em] leading-[1.15] font-semibold",
-      "card_title": "text-lg sm:text-xl font-semibold tracking-[-0.01em]",
-      "body": "text-sm sm:text-base leading-relaxed text-[color:var(--kti-text-strong)]",
-      "small": "text-xs sm:text-sm text-[color:var(--kti-text-dim)]",
-      "mono_label": "font-hud text-[11px] uppercase tracking-[0.28em] text-[color:var(--kti-text-dim)]"
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl",
+      "h2": "text-base md:text-lg",
+      "body": "text-sm md:text-base",
+      "small": "text-xs",
+      "sidebar_section_label": "text-[11px] uppercase tracking-[0.28em] (use .kti-hud-label)",
+      "sidebar_item": "text-sm"
+    },
+    "sidebar_copy_rules": [
+      "Use Bahasa Indonesia labels for client portal (more approachable)",
+      "Use concise nouns for admin/staff (Dashboard, CRM, Projects, Product, Content, System)",
+      "Avoid ambiguous labels like 'Support' for discovery tools"
+    ]
+  },
+  "information_architecture": {
+    "admin_staff_sidebar": {
+      "width": "w-64 fixed (256px) — do not change",
+      "structure": [
+        {
+          "section_id": "main",
+          "label": "Main",
+          "items": [
+            {"label": "Dashboard", "route": "(existing)", "icon": "LayoutDashboard", "data_testid": "admin-nav-dashboard"}
+          ]
+        },
+        {
+          "section_id": "crm",
+          "label": "CRM",
+          "items": [
+            {"label": "Leads", "route": "(existing)", "icon": "UserPlus", "data_testid": "admin-nav-leads"},
+            {"label": "Assessments", "route": "(existing)", "icon": "ClipboardList", "data_testid": "admin-nav-assessments"},
+            {"label": "Clients", "route": "(existing)", "icon": "Building2", "data_testid": "admin-nav-crm-clients"}
+          ],
+          "notes": [
+            "Move Assessments here (discovery/qualification fits CRM)",
+            "Keep Demo Sessions OUT of CRM"
+          ]
+        },
+        {
+          "section_id": "delivery",
+          "label": "Delivery",
+          "items": [
+            {"label": "Projects", "route": "(existing)", "icon": "FolderKanban", "data_testid": "admin-nav-projects"},
+            {"label": "Messages", "route": "(existing)", "icon": "MessagesSquare", "data_testid": "admin-nav-messages"},
+            {"label": "AI Conversations", "route": "(existing)", "icon": "Sparkles", "data_testid": "admin-nav-ai-conversations"}
+          ]
+        },
+        {
+          "section_id": "product",
+          "label": "Product",
+          "items": [
+            {"label": "Demo Sessions", "route": "(existing)", "icon": "CalendarClock", "data_testid": "admin-nav-demo-sessions"},
+            {"label": "Analytics", "route": "(existing)", "icon": "BarChart3", "data_testid": "admin-nav-analytics"},
+            {"label": "SEO", "route": "(existing)", "icon": "Search", "data_testid": "admin-nav-seo"}
+          ],
+          "notes": [
+            "Analytics + SEO are not Projects; keep them in Product/Insights"
+          ]
+        },
+        {
+          "section_id": "content",
+          "label": "Content",
+          "type": "collapsible_group",
+          "top_level_item": {"label": "CMS Hub", "route": "(new page optional)", "icon": "PanelsTopLeft", "data_testid": "admin-nav-cms-hub"},
+          "subgroups": [
+            {
+              "group_id": "website",
+              "label": "Website",
+              "default_state": "expanded",
+              "items": [
+                {"label": "Home", "route": "(existing: Home Blocks)", "icon": "Home", "data_testid": "admin-nav-cms-home"},
+                {"label": "Services", "route": "(existing)", "icon": "Wrench", "data_testid": "admin-nav-cms-services"},
+                {"label": "Cases", "route": "(existing)", "icon": "Briefcase", "data_testid": "admin-nav-cms-cases"},
+                {"label": "Tech", "route": "(existing)", "icon": "Cpu", "data_testid": "admin-nav-cms-tech"},
+                {"label": "Team", "route": "(existing)", "icon": "Users", "data_testid": "admin-nav-cms-team"},
+                {"label": "Careers", "route": "(existing)", "icon": "BadgeCheck", "data_testid": "admin-nav-cms-careers"},
+                {"label": "Blog", "route": "(existing)", "icon": "Newspaper", "data_testid": "admin-nav-cms-blog"},
+                {"label": "Resources", "route": "(existing)", "icon": "BookOpen", "data_testid": "admin-nav-cms-resources"},
+                {"label": "Legal", "route": "(existing)", "icon": "Scale", "data_testid": "admin-nav-cms-legal"}
+              ]
+            },
+            {
+              "group_id": "components",
+              "label": "Components",
+              "default_state": "collapsed",
+              "items": [
+                {"label": "Testimonials", "route": "(existing)", "icon": "Quote", "data_testid": "admin-nav-cms-testimonials"},
+                {"label": "FAQ", "route": "(existing)", "icon": "HelpCircle", "data_testid": "admin-nav-cms-faq"},
+                {"label": "Packages", "route": "(existing)", "icon": "Package", "data_testid": "admin-nav-cms-packages"}
+              ],
+              "notes": [
+                "This subgroup is for reusable UI blocks/sections"
+              ]
+            },
+            {
+              "group_id": "showcase",
+              "label": "Showcase",
+              "default_state": "collapsed",
+              "items": [
+                {"label": "Client Logos", "route": "(existing: CMS Clients)", "icon": "GalleryHorizontalEnd", "data_testid": "admin-nav-cms-client-logos"},
+                {"label": "Partners", "route": "(existing)", "icon": "Handshake", "data_testid": "admin-nav-cms-partners"}
+              ],
+              "notes": [
+                "Rename CMS 'Clients' to 'Client Logos' to avoid confusion with CRM Clients"
+              ]
+            },
+            {
+              "group_id": "media",
+              "label": "Media",
+              "default_state": "collapsed",
+              "items": [
+                {"label": "Media Library", "route": "(existing)", "icon": "Image", "data_testid": "admin-nav-media-library"}
+              ],
+              "notes": [
+                "Media Library should live under Content, not as its own top-level section"
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": "system",
+          "label": "System",
+          "items": [
+            {"label": "Users", "route": "(existing)", "icon": "UserCog", "data_testid": "admin-nav-users"},
+            {"label": "Integrations", "route": "(existing)", "icon": "Plug", "data_testid": "admin-nav-integrations"},
+            {"label": "Email Outbox", "route": "(existing)", "icon": "Send", "data_testid": "admin-nav-email-outbox"},
+            {"label": "Settings", "route": "(existing)", "icon": "Settings", "data_testid": "admin-nav-settings"}
+          ],
+          "notes": [
+            "Move Settings OUT of CMS"
+          ]
+        }
+      ],
+      "interaction_rules": [
+        "Only one CMS subgroup expanded at a time on mobile (accordion behavior); allow multiple expanded on desktop",
+        "Persist expanded/collapsed state in localStorage per role (key: kti.sidebar.admin.contentState)",
+        "Active route highlight: left 2px indigo bar + subtle glass background",
+        "If sidebar scrolls, keep section labels sticky within scroll area for orientation"
+      ]
+    },
+    "client_sidebar": {
+      "structure": [
+        {
+          "section_id": "main",
+          "label": "Main",
+          "items": [
+            {"label": "Dashboard", "route": "(existing)", "icon": "LayoutDashboard", "data_testid": "client-nav-dashboard"}
+          ]
+        },
+        {
+          "section_id": "proyek",
+          "label": "Proyek",
+          "items": [
+            {"label": "Proyek Saya", "route": "(existing: My Projects)", "icon": "FolderKanban", "data_testid": "client-nav-my-projects"},
+            {"label": "Invoice", "route": "(existing: Invoices)", "icon": "Receipt", "data_testid": "client-nav-invoices"}
+          ]
+        },
+        {
+          "section_id": "discovery",
+          "label": "Discovery",
+          "items": [
+            {"label": "Assessment", "route": "(existing)", "icon": "ClipboardList", "data_testid": "client-nav-assessment"}
+          ],
+          "notes": [
+            "Discovery is clearer than Support; Assessment is a discovery/briefing tool"
+          ]
+        },
+        {
+          "section_id": "komunikasi",
+          "label": "Komunikasi",
+          "items": [
+            {"label": "Pesan", "route": "(existing: Messages)", "icon": "MessagesSquare", "data_testid": "client-nav-messages"},
+            {"label": "AI Assistant", "route": "(existing)", "icon": "Sparkles", "data_testid": "client-nav-ai-assistant"}
+          ]
+        }
+      ],
+      "copy_notes": [
+        "Use Indonesian section labels; keep item labels short",
+        "Avoid 'Support' unless you actually have ticketing/helpdesk"
+      ]
     }
   },
-  "color_tokens": {
-    "notes": "Maintain existing KTI dark + indigo + teal. Add a few semantic tokens for content types and CMS surfaces.",
-    "css_variables_to_add_in_index_css": {
-      "content_type_accents": {
-        "--kti-portfolio-accent": "rgba(115, 209, 173, 0.95)",
-        "--kti-case-accent": "rgba(124, 104, 225, 0.95)",
-        "--kti-product-accent": "rgba(183, 168, 255, 0.95)"
+  "login_page": {
+    "goal": "Single login form for all roles with clear role context (non-breaking).",
+    "layout": {
+      "pattern": "Centered card on dark space canvas with subtle aurora + star noise (decorative only)",
+      "grid": "Mobile-first: single column; Desktop: optional split with left brand panel (max 40%) and right form (60%)",
+      "card": "Use .kti-glass-premium-highlight with max-w-md, generous padding"
+    },
+    "role_context_ui": {
+      "component": "Segmented control (Tabs) above the form",
+      "tabs": [
+        {"value": "client", "label": "Client", "helper": "Akses proyek, invoice, dan komunikasi", "data_testid": "login-role-tab-client"},
+        {"value": "staff", "label": "Staff", "helper": "Kelola delivery, konten, dan komunikasi", "data_testid": "login-role-tab-staff"},
+        {"value": "admin", "label": "Admin", "helper": "Akses penuh: CRM, system, dan CMS", "data_testid": "login-role-tab-admin"}
+      ],
+      "behavior": [
+        "Role tabs only change helper copy + subtle accent (indigo/teal) — authentication remains same endpoint",
+        "Remember last selected role in localStorage (key: kti.login.roleHint)",
+        "After login, backend/route guard still determines actual role; tab is a hint, not authority"
+      ]
+    },
+    "form_fields": {
+      "primary": [
+        {"type": "email", "label": "Email", "data_testid": "login-email-input"},
+        {"type": "password", "label": "Password", "data_testid": "login-password-input"}
+      ],
+      "secondary": [
+        {"type": "checkbox", "label": "Remember me", "data_testid": "login-remember-checkbox"},
+        {"type": "link", "label": "Forgot password?", "data_testid": "login-forgot-password-link"}
+      ],
+      "submit": {"label": "Sign in", "data_testid": "login-submit-button"},
+      "error_area": {"data_testid": "login-error-message"}
+    },
+    "micro_interactions": [
+      "Primary button: hover -> subtle indigo glow (shadow), active -> scale-95 (transition-transform only on active state)",
+      "Inputs: focus-visible ring uses --kti-ring; show inline validation message under field",
+      "Tabs: active indicator slides (Framer Motion optional)"
+    ]
+  },
+  "cms_hub_page": {
+    "concept": "A landing page when clicking 'CMS Hub' that provides a scannable grid of CMS areas (Pages, Components, Showcase, Media) to reduce sidebar hunting.",
+    "layout": {
+      "header": {
+        "title": "Content Hub",
+        "subtitle": "Kelola website, komponen, dan aset dalam satu tempat.",
+        "data_testid": "cms-hub-header"
       },
-      "cms": {
-        "--kti-cms-canvas": "rgba(255,255,255,0.04)",
-        "--kti-cms-inspector": "rgba(255,255,255,0.06)",
-        "--kti-drop-indicator": "rgba(115,209,173,0.55)"
+      "content": {
+        "pattern": "Bento grid of cards (2 columns on md, 3 on lg)",
+        "cards": [
+          {"title": "Website", "desc": "Home, Services, Cases, Blog, Careers…", "cta": "Open", "data_testid": "cms-hub-card-website"},
+          {"title": "Components", "desc": "Testimonials, FAQ, Packages", "cta": "Open", "data_testid": "cms-hub-card-components"},
+          {"title": "Showcase", "desc": "Client Logos, Partners", "cta": "Open", "data_testid": "cms-hub-card-showcase"},
+          {"title": "Media", "desc": "Media Library", "cta": "Open", "data_testid": "cms-hub-card-media"}
+        ]
       }
     },
-    "tailwind_usage_examples": {
-      "portfolio_accent": "text-[color:var(--kti-teal)]",
-      "case_accent": "text-[color:var(--kti-indigo)]",
-      "product_accent": "text-[color:var(--kti-electric)]",
-      "drop_indicator": "bg-[color:var(--kti-drop-indicator)]"
+    "search": {
+      "pattern": "Command palette style search for CMS items",
+      "data_testid": "cms-hub-search"
+    }
+  },
+  "components": {
+    "component_path": {
+      "sidebar": [
+        "/app/frontend/src/components/ui/collapsible.jsx",
+        "/app/frontend/src/components/ui/accordion.jsx (optional for mobile-only single-open behavior)",
+        "/app/frontend/src/components/ui/scroll-area.jsx",
+        "/app/frontend/src/components/ui/separator.jsx",
+        "/app/frontend/src/components/ui/tooltip.jsx (for collapsed sidebar icon-only mode if exists)",
+        "/app/frontend/src/components/ui/badge.jsx (optional: small counts)",
+        "/app/frontend/src/components/ui/button.jsx"
+      ],
+      "login": [
+        "/app/frontend/src/components/ui/card.jsx",
+        "/app/frontend/src/components/ui/tabs.jsx",
+        "/app/frontend/src/components/ui/input.jsx",
+        "/app/frontend/src/components/ui/label.jsx",
+        "/app/frontend/src/components/ui/checkbox.jsx",
+        "/app/frontend/src/components/ui/button.jsx",
+        "/app/frontend/src/components/ui/sonner.jsx (toast feedback)"
+      ],
+      "cms_hub": [
+        "/app/frontend/src/components/ui/card.jsx",
+        "/app/frontend/src/components/ui/command.jsx (search)",
+        "/app/frontend/src/components/ui/breadcrumb.jsx",
+        "/app/frontend/src/components/ui/badge.jsx"
+      ]
+    },
+    "icon_library": {
+      "use": "lucide-react",
+      "note": "Do not use emoji icons. Keep icon stroke 1.75–2.0 for crispness on dark UI."
     }
   },
   "layout_and_grid": {
-    "container": "Use .kti-container for reading areas; .kti-container-wide for grids. Avoid centered text blocks; align left for scanning.",
-    "section_spacing": "Use .kti-section (py-16 sm:py-20 lg:py-28). For index pages with filters, use tighter top padding (pt-10) and generous bottom padding.",
-    "index_pages": {
-      "pattern": "Header (title + summary + quick stats) -> Filter rail -> Grid -> Pagination",
-      "grid": {
-        "portfolio": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6",
-        "case_studies": "grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6",
-        "products": "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
-      }
+    "sidebar": {
+      "container": "w-64 fixed left-0 top-0 h-screen",
+      "inner": "Use ScrollArea for nav list; keep bottom utility pinned (flex-col with mt-auto)",
+      "spacing": "Section padding px-3; item height 36–40px; section gap 14–18px"
     },
-    "detail_pages": {
-      "pattern": "Hero block -> sticky meta rail (desktop) -> blocks stream",
-      "meta_rail": "On lg+: use a 12-col grid with a 4-col sticky meta card and 8-col content stream. On mobile: meta collapses into Accordion."
+    "content_area": {
+      "pattern": "Main content uses padding p-4 sm:p-6; avoid centered text blocks; keep max-w for reading pages only",
+      "breadcrumbs": "Use Breadcrumb component for CMS pages to reduce reliance on sidebar"
     }
   },
-  "component_path": {
-    "shadcn_primary": [
-      "/app/frontend/src/components/ui/button.jsx",
-      "/app/frontend/src/components/ui/badge.jsx",
-      "/app/frontend/src/components/ui/card.jsx",
-      "/app/frontend/src/components/ui/navigation-menu.jsx",
-      "/app/frontend/src/components/ui/sheet.jsx",
-      "/app/frontend/src/components/ui/separator.jsx",
-      "/app/frontend/src/components/ui/tabs.jsx",
-      "/app/frontend/src/components/ui/tooltip.jsx",
-      "/app/frontend/src/components/ui/dialog.jsx",
-      "/app/frontend/src/components/ui/drawer.jsx",
-      "/app/frontend/src/components/ui/dropdown-menu.jsx",
-      "/app/frontend/src/components/ui/command.jsx",
-      "/app/frontend/src/components/ui/accordion.jsx",
-      "/app/frontend/src/components/ui/scroll-area.jsx",
-      "/app/frontend/src/components/ui/pagination.jsx",
-      "/app/frontend/src/components/ui/table.jsx",
-      "/app/frontend/src/components/ui/resizable.jsx",
-      "/app/frontend/src/components/ui/skeleton.jsx",
-      "/app/frontend/src/components/ui/sonner.jsx"
-    ],
-    "custom_components_to_create": [
-      "src/components/content/FilterRail.js",
-      "src/components/content/TagChip.js",
-      "src/components/content/PortfolioCard.js",
-      "src/components/content/CaseStudyCard.js",
-      "src/components/content/ProductCard.js",
-      "src/components/content/TemplateBadge.js",
-      "src/components/content/BlocksRenderer.js",
-      "src/components/content/blocks/BlockHero.js",
-      "src/components/content/blocks/BlockGallery.js",
-      "src/components/content/blocks/BlockMetrics.js",
-      "src/components/content/blocks/BlockFeatures.js",
-      "src/components/content/blocks/BlockTestimonials.js",
-      "src/components/content/blocks/BlockCTA.js",
-      "src/components/content/blocks/BlockDemoEmbed.js",
-      "src/components/cms/TemplatePickerDialog.js",
-      "src/components/cms/BlockLibraryDrawer.js",
-      "src/components/cms/BlockBuilderCanvas.js",
-      "src/components/cms/BlockInspectorPanel.js",
-      "src/components/cms/BlockRow.js",
-      "src/components/cms/BlockReorderDialog.js"
-    ]
-  },
-  "navigation_updates": {
-    "menu_structure": {
-      "portfolio_dropdown": [
-        { "label": "Lihat Semua", "href": "/portfolio", "data-testid": "nav-portfolio-all-link" },
-        { "label": "Studi Kasus", "href": "/case-studies", "data-testid": "nav-portfolio-case-studies-link" }
-      ],
-      "products_main": { "label": "Products", "href": "/products", "data-testid": "nav-products-link" }
+  "component_states": {
+    "nav_item": {
+      "default": "text-[color:var(--kti-text-dim)] hover:text-[color:var(--kti-text-strong)]",
+      "hover": "bg-white/[0.04] (no gradient), border border-white/10",
+      "active": "bg-white/[0.06] text-[color:var(--kti-text-strong)] + left indicator (bg-[color:var(--kti-indigo)])",
+      "focus": "use .kti-focus"
     },
-    "interaction": {
-      "desktop": "Use shadcn NavigationMenu for dropdown; keep floating pill navbar styling.",
-      "mobile": "Use Sheet with grouped links; Portfolio group expands via Collapsible/Accordion."
-    }
-  },
-  "content_types_visual_hierarchy": {
-    "portfolio": {
-      "goal": "Visual-first browsing.",
-      "signature": [
-        "Large thumbnail dominance",
-        "Minimal copy",
-        "Teal dot tags",
-        "Hover reveals quick meta"
-      ],
-      "accent": "--kti-portfolio-accent",
-      "card_recipe": {
-        "wrapper": "group relative overflow-hidden rounded-[var(--kti-radius-card)] border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_18px_60px_rgba(0,0,0,0.55)]",
-        "thumb": "aspect-[16/10] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]",
-        "overlay": "absolute inset-0 bg-[image:var(--kti-media-overlay-top)] opacity-80",
-        "meta": "absolute inset-x-0 bottom-0 p-4 sm:p-5"
-      }
+    "collapsible_group": {
+      "chevron": "rotate-90 on open (transition-transform duration-200)",
+      "group_label": "use .kti-hud-label; keep sticky if scrollable"
     },
-    "case_studies": {
-      "goal": "Technical credibility + outcomes.",
-      "signature": [
-        "Problem → Solution → Results structure",
-        "Metrics chips",
-        "Demo embed block",
-        "Stack badges"
-      ],
-      "accent": "--kti-case-accent",
-      "card_recipe": {
-        "wrapper": "group rounded-[var(--kti-radius-card)] border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_18px_60px_rgba(0,0,0,0.55)] hover:border-white/15",
-        "inner": "p-5 sm:p-6",
-        "top": "flex items-start justify-between gap-4",
-        "metrics": "mt-4 grid grid-cols-2 gap-3"
-      }
-    },
-    "products": {
-      "goal": "Commercial clarity + CTA.",
-      "signature": [
-        "Clear positioning statement",
-        "Feature bullets",
-        "Pricing/plan hint (optional)",
-        "External CTA emphasis"
-      ],
-      "accent": "--kti-product-accent",
-      "card_recipe": {
-        "wrapper": "group rounded-[var(--kti-radius-card)] border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_18px_60px_rgba(0,0,0,0.55)]",
-        "inner": "p-5 sm:p-6",
-        "cta": "mt-5 inline-flex w-full items-center justify-between rounded-full bg-white/8 border border-white/14 px-5 py-3 text-sm font-semibold hover:bg-white/10"
+    "buttons": {
+      "primary": {
+        "shape": "rounded-[14px]",
+        "surface": "bg-[color:var(--kti-indigo)] text-[color:var(--kti-space-975)]",
+        "hover": "hover:shadow-[var(--kti-glow-indigo)] hover:brightness-105",
+        "active": "active:scale-[0.98]",
+        "transition": "transition-colors transition-shadow duration-200"
+      },
+      "secondary": {
+        "surface": "bg-white/[0.06] border border-white/10 text-[color:var(--kti-text-strong)]",
+        "hover": "hover:bg-white/[0.09] hover:border-white/[0.16]",
+        "transition": "transition-colors duration-200"
+      },
+      "ghost": {
+        "surface": "bg-transparent text-[color:var(--kti-text-dim)]",
+        "hover": "hover:text-[color:var(--kti-text-strong)] hover:bg-white/[0.04]",
+        "transition": "transition-colors duration-200"
       }
     }
   },
-  "filter_system": {
-    "ux_principles": [
-      "Filters must be fast to scan: grouped, collapsible, searchable for tags.",
-      "Show active filters as removable chips above the grid.",
-      "Provide 'Reset' and 'Save view' (optional) actions.",
-      "On mobile, filters open in a Sheet/Drawer; grid remains primary."
-    ],
-    "components": {
-      "desktop": "Left sidebar (lg:w-[320px]) using Card + Accordion groups.",
-      "mobile": "Sheet (from right) with same groups; sticky bottom bar with Apply/Reset."
-    },
-    "filter_groups": [
-      { "key": "industry", "label": "Industry", "control": "Checkbox list + search", "data-testid": "filters-industry-group" },
-      { "key": "technology", "label": "Technology", "control": "ToggleGroup or Checkbox list", "data-testid": "filters-technology-group" },
-      { "key": "projectType", "label": "Project Type", "control": "RadioGroup or Checkbox", "data-testid": "filters-project-type-group" },
-      { "key": "tags", "label": "Tags", "control": "Command palette multi-select", "data-testid": "filters-tags-group" }
-    ],
-    "active_filter_chips": {
-      "chip": "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-xs font-hud uppercase tracking-[0.18em]",
-      "remove_button": "size-7 rounded-full bg-white/8 border border-white/12 hover:bg-white/10",
-      "data-testid": {
-        "wrap": "active-filters-chip-row",
-        "reset": "active-filters-reset-button"
-      }
-    }
-  },
-  "templates_and_blocks": {
-    "template_picker": {
-      "ui": "Dialog with 2-level selection: Content Type tabs (Portfolio / Case Study / Product) + template cards grid.",
-      "template_card": {
-        "wrapper": "group rounded-[18px] border border-white/10 bg-white/5 p-4 hover:border-white/15",
-        "preview": "aspect-[16/9] rounded-[14px] bg-white/5 border border-white/10 overflow-hidden",
-        "title": "mt-3 text-sm font-semibold",
-        "desc": "mt-1 text-xs text-[color:var(--kti-text-dim)]"
-      },
-      "data_testids": {
-        "open": "cms-template-picker-open-button",
-        "dialog": "cms-template-picker-dialog",
-        "confirm": "cms-template-picker-confirm-button"
-      }
-    },
-    "block_builder": {
-      "layout": "3-panel admin layout using shadcn Resizable: left Block Library, center Canvas, right Inspector.",
-      "canvas": {
-        "surface": "rounded-[var(--kti-radius-card)] bg-[color:var(--kti-cms-canvas)] border border-white/10",
-        "empty_state": "Centered Card with suggested blocks (Hero, Gallery, Metrics) + 'Add block' CTA."
-      },
-      "block_row": {
-        "wrapper": "group relative rounded-[16px] border border-white/10 bg-white/5 p-4",
-        "handle": "absolute left-3 top-4 grid size-8 place-items-center rounded-full bg-white/6 border border-white/10 opacity-0 group-hover:opacity-100",
-        "toolbar": "absolute right-3 top-4 flex items-center gap-2 opacity-0 group-hover:opacity-100",
-        "drop_indicator": "h-0.5 rounded-full bg-[color:var(--kti-drop-indicator)]"
-      },
-      "interactions": [
-        "Drag handle appears on hover (pointer-fine).",
-        "Keyboard reorder: Move Up/Down actions in block menu.",
-        "Inline add: between blocks show a subtle '+ Add block' row.",
-        "Autosave toast via Sonner (debounced)."
-      ],
-      "data_testids": {
-        "canvas": "cms-block-builder-canvas",
-        "add_block": "cms-add-block-button",
-        "block_row": "cms-block-row",
-        "block_menu": "cms-block-row-menu-button",
-        "inspector": "cms-block-inspector-panel"
-      }
-    },
-    "blocks_catalog": [
-      {
-        "type": "hero",
-        "label": "Hero",
-        "purpose": "Title, summary, primary CTA, optional background media.",
-        "recommended_for": ["portfolio", "case_studies", "products"],
-        "data-testid": "block-hero"
-      },
-      {
-        "type": "gallery",
-        "label": "Gallery",
-        "purpose": "Image grid/carousel with captions; lazy loaded.",
-        "recommended_for": ["portfolio"],
-        "data-testid": "block-gallery"
-      },
-      {
-        "type": "metrics",
-        "label": "Metrics",
-        "purpose": "Outcome stats + optional sparkline.",
-        "recommended_for": ["case_studies", "products"],
-        "data-testid": "block-metrics"
-      },
-      {
-        "type": "features",
-        "label": "Features",
-        "purpose": "Feature list with icons and short copy.",
-        "recommended_for": ["products"],
-        "data-testid": "block-features"
-      },
-      {
-        "type": "testimonials",
-        "label": "Testimonials",
-        "purpose": "Client quotes; keep short; no gradients.",
-        "recommended_for": ["portfolio", "case_studies", "products"],
-        "data-testid": "block-testimonials"
-      },
-      {
-        "type": "cta",
-        "label": "CTA",
-        "purpose": "Primary conversion block; external link allowed.",
-        "recommended_for": ["products", "case_studies"],
-        "data-testid": "block-cta"
-      },
-      {
-        "type": "demoEmbed",
-        "label": "Demo Embed",
-        "purpose": "Embed Loom/Youtube/iframe demo with AspectRatio + overlay.",
-        "recommended_for": ["case_studies", "products"],
-        "data-testid": "block-demo-embed"
-      }
-    ]
-  },
-  "performance_and_media": {
-    "portfolio_galleries": {
-      "lazy_loading": "All images must use loading='lazy' and decoding='async'. Use blur placeholder (CSS) and AspectRatio to prevent layout shift.",
-      "progressive": "Prefer responsive srcset if available; otherwise constrain max width and use object-cover.",
-      "carousel": "Use shadcn Carousel for small sets; for large sets prefer masonry grid with pagination."
-    },
-    "demo_embeds": {
-      "policy": "Embeds must be click-to-load on mobile to avoid heavy iframes. Show poster + play button; load iframe on click.",
-      "reduced_motion": "No autoplay; respect prefers-reduced-motion."
-    }
-  },
-  "motion_and_microinteractions": {
+  "motion": {
     "principles": [
-      "Motion should feel cinematic but restrained: 180–260ms for hover, 320–520ms for section reveals.",
-      "Never animate layout-critical properties on scroll for mobile; prefer opacity/transform.",
-      "Disable heavy scroll effects for prefers-reduced-motion."
+      "Use motion to clarify hierarchy: expand/collapse, active route, role context",
+      "Keep durations 160–220ms for UI; 280–360ms for page-level transitions",
+      "Respect prefers-reduced-motion"
     ],
-    "recipes": {
-      "card_hover": "transition-shadow duration-200 hover:shadow-[0_26px_80px_rgba(0,0,0,0.62)]",
-      "thumb_hover": "transition-transform duration-300 group-hover:scale-[1.03]",
-      "chip_hover": "transition-colors duration-200 hover:bg-white/10",
-      "filter_open": "Use Sheet/Accordion with subtle fade+slide (Framer Motion optional)."
-    },
-    "gsap_usage": {
-      "portfolio_index": "Optional: subtle stagger reveal for cards on first load (no pin).",
-      "case_study_detail": "Crossfade between blocks as they enter viewport; keep it subtle.",
-      "products": "CTA block can have a gentle glow pulse (CSS keyframes) but disable on reduced motion."
+    "recommended_library": {
+      "name": "framer-motion (optional)",
+      "install": "npm i framer-motion",
+      "usage": [
+        "Animate Tabs indicator on login role switch",
+        "Animate Collapsible content height + opacity for CMS groups"
+      ]
     }
   },
   "accessibility": {
-    "focus": "Use .kti-focus on all interactive elements. Ensure visible focus ring on dark glass.",
-    "hit_targets": "Minimum 44px touch targets for mobile filter toggles and chip remove buttons.",
-    "aria": "All dropdowns/sheets/dialogs must have proper aria labels (shadcn provides).",
-    "color_contrast": "Avoid teal text on glass without sufficient contrast; use teal for accents/dots, not long paragraphs."
+    "requirements": [
+      "WCAG AA contrast: ensure nav text-dim still readable on bg; use text-strong for active",
+      "Keyboard navigation: Collapsible triggers must be focusable; Enter/Space toggles",
+      "Visible focus ring: use .kti-focus on all interactive elements",
+      "ARIA: Collapsible uses aria-expanded; Tabs uses proper roles (shadcn handles)"
+    ]
   },
-  "image_urls": [
-    {
-      "category": "portfolio/index-hero-bg",
-      "description": "Abstract teal/black waves for Portfolio hero background (use with overlay).",
-      "url": "https://images.pexels.com/photos/12970447/pexels-photo-12970447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "category": "portfolio/detail-gallery-bg",
-      "description": "Dark teal circular abstract for gallery-focused template background accent (<=20% viewport).",
-      "url": "https://images.pexels.com/photos/34270452/pexels-photo-34270452.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "category": "case-studies/index-hero-bg",
-      "description": "Cinematic office/team working shot for credibility (use strong overlay for legibility).",
-      "url": "https://images.unsplash.com/photo-1629904853716-f0bc54eea481?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwzfHxlbnRlcnByaXNlJTIwc29mdHdhcmUlMjB0ZWFtJTIwd29ya2luZyUyMG9mZmljZSUyMGNpbmVtYXRpYyUyMGRhcmt8ZW58MHx8fHwxNzgwMzAwODM0fDA&ixlib=rb-4.1.0&q=85"
-    },
-    {
-      "category": "products/index-hero-bg",
-      "description": "Modern dev office wide shot for Products hero background.",
-      "url": "https://images.pexels.com/photos/6804068/pexels-photo-6804068.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    }
-  ],
+  "image_urls": {
+    "note": "No new branding imagery required for IA-only redesign. Keep existing space theme assets. Optional: add subtle SVG starfield background (CSS-only already exists: .kti-starlayer).",
+    "categories": [
+      {
+        "category": "login_background",
+        "description": "Prefer CSS-only aurora + noise overlay; avoid heavy images for performance.",
+        "urls": []
+      }
+    ]
+  },
   "instructions_to_main_agent": [
-    "Keep existing V2 tokens and utilities; only ADD the new semantic tokens for content types + CMS surfaces.",
-    "Implement new public pages: /portfolio, /portfolio/:slug, /case-studies, /case-studies/:slug, /products, /products/:slug using the content-type hierarchy rules (Portfolio visual-first, Case Studies technical-first, Products commercial-first).",
-    "Build a reusable FilterRail component that can render different filter schemas (industry/technology/project type/tags) and supports mobile Sheet.",
-    "Create BlocksRenderer that maps block.type -> block component; ensure each block root has data-testid like data-testid=\"content-block-<type>\".",
-    "CMS: implement TemplatePickerDialog + BlockBuilderCanvas with Resizable panels; include drag handles + reorder + inspector. Provide keyboard reorder actions.",
-    "Performance: lazy-load gallery images; click-to-load demo embeds; use AspectRatio to prevent CLS.",
-    "Do not introduce raw HTML dropdowns/toasts; use shadcn components only. Ensure Sonner is used for autosave and publish toasts.",
-    "Ensure every interactive element and key info has data-testid (kebab-case)."
+    "Implement new sidebar IA without changing routes: only labels, grouping, and collapsible structure.",
+    "Rename CMS 'Clients' to 'Client Logos' in UI only; keep route unchanged.",
+    "Move Media Library under Content group.",
+    "Move Settings to System section.",
+    "Add CMS Hub page (optional) and link it from Content top-level item; if not implementing page, still keep Content collapsible groups.",
+    "All interactive elements must include data-testid (kebab-case) as specified above.",
+    "Use shadcn/ui components from /src/components/ui (Collapsible, ScrollArea, Tabs, Card, Button, Input, etc.).",
+    "Do not change sidebar width (w-64).",
+    "Do not introduce new gradients beyond existing subtle aurora overlay; keep gradients decorative and under 20% viewport."
   ],
-  "general_ui_ux_design_guidelines_appendix": "<General UI UX Design Guidelines>  \n    - You must **not** apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms\n    - You must **not** center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text\n   - NEVER: use AI assistant Emoji characters like`🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons. Always use **FontAwesome cdn** or **lucid-react** library already installed in the package.json\n\n **GRADIENT RESTRICTION RULE**\nNEVER use dark/saturated gradient combos (e.g., purple/pink) on any UI element.  Prohibited gradients: blue-500 to purple 600, purple 500 to pink-500, green-500 to blue-500, red to pink etc\nNEVER use dark gradients for logo, testimonial, footer etc\nNEVER let gradients cover more than 20% of the viewport.\nNEVER apply gradients to text-heavy content or reading areas.\nNEVER use gradients on small UI elements (<100px width).\nNEVER stack multiple gradient layers in the same viewport.\n\n**ENFORCEMENT RULE:**\n    • Id gradient area exceeds 20% of viewport OR affects readability, **THEN** use solid colors\n\n**How and where to use:**\n   • Section backgrounds (not content backgrounds)\n   • Hero section header content. Eg: dark to light to dark color\n   • Decorative overlays and accent elements only\n   • Hero section with 2-3 mild color\n   • Gradients creation can be done for any angle say horizontal, vertical or diagonal\n\n- For AI chat, voice application, **do not use purple color. Use color like light green, ocean blue, peach orange etc**\n\n</Font Guidelines>\n\n- Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead. \n   \n- Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.\n\n- Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.\n   \n- Before generating UI, infer the visual style from the problem statement (palette, contrast, mood, motion) and immediately instantiate it by setting global design tokens (primary, secondary/accent, background, foreground, ring, state colors), rather than relying on any library defaults. Don't make the background dark as a default step, always understand problem first and define colors accordingly\n    Eg: - if it implies playful/energetic, choose a colorful scheme\n           - if it implies monochrome/minimal, choose a black–white/neutral scheme\n\n**Component Reuse:**\n\t- Prioritize using pre-existing components from src/components/ui when applicable\n\t- Create new components that match the style and conventions of existing components when needed\n\t- Examine existing components to understand the project's component patterns before creating new ones\n\n**IMPORTANT**: Do not use HTML based component like dropdown, calendar, toast etc. You **MUST** always use `/app/frontend/src/components/ui/ ` only as a primary components as these are modern and stylish component\n\n**Best Practices:**\n\t- Use Shadcn/UI as the primary component library for consistency and accessibility\n\t- Import path: ./components/[component-name]\n\n**Export Conventions:**\n\t- Components MUST use named exports (export const ComponentName = ...)\n\t- Pages MUST use default exports (export default function PageName() {...})\n\n**Toasts:**\n  - Use `sonner` for toasts\"\n  - Sonner component are located in `/app/src/components/ui/sonner.tsx`\n\nUse 2–4 color gradients, subtle textures/noise overlays, or CSS-based noise to avoid flat visuals.\n</General UI UX Design Guidelines>"
+  "general_ui_ux_design_guidelines": "<General UI UX Design Guidelines>  \n    - You must **not** apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms\n    - You must **not** center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text\n   - NEVER: use AI assistant Emoji characters like`🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons. Always use **FontAwesome cdn** or **lucid-react** library already installed in the package.json\n\n **GRADIENT RESTRICTION RULE**\nNEVER use dark/saturated gradient combos (e.g., purple/pink) on any UI element.  Prohibited gradients: blue-500 to purple 600, purple 500 to pink-500, green-500 to blue-500, red to pink etc\nNEVER use dark gradients for logo, testimonial, footer etc\nNEVER let gradients cover more than 20% of the viewport.\nNEVER apply gradients to text-heavy content or reading areas.\nNEVER use gradients on small UI elements (<100px width).\nNEVER stack multiple gradient layers in the same viewport.\n\n**ENFORCEMENT RULE:**\n    • Id gradient area exceeds 20% of viewport OR affects readability, **THEN** use solid colors\n\n**How and where to use:**\n   • Section backgrounds (not content backgrounds)\n   • Hero section header content. Eg: dark to light to dark color\n   • Decorative overlays and accent elements only\n   • Hero section with 2-3 mild color\n   • Gradients creation can be done for any angle say horizontal, vertical or diagonal\n\n- For AI chat, voice application, **do not use purple color. Use color like light green, ocean blue, peach orange etc**\n\n</Font Guidelines>\n\n- Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead. \n   \n- Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.\n\n- Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.\n   \n- Before generating UI, infer the visual style from the problem statement (palette, contrast, mood, motion) and immediately instantiate it by setting global design tokens (primary, secondary/accent, background, foreground, ring, state colors), rather than relying on any library defaults. Don't make the background dark as a default step, always understand problem first and define colors accordingly\n    Eg: - if it implies playful/energetic, choose a colorful scheme\n           - if it implies monochrome/minimal, choose a black–white/neutral scheme\n\n**Component Reuse:**\n\t- Prioritize using pre-existing components from src/components/ui when applicable\n\t- Create new components that match the style and conventions of existing components when needed\n\t- Examine existing components to understand the project's component patterns before creating new ones\n\n**IMPORTANT**: Do not use HTML based component like dropdown, calendar, toast etc. You **MUST** always use `/app/frontend/src/components/ui/ ` only as a primary components as these are modern and stylish component\n\n**Best Practices:**\n\t- Use Shadcn/UI as the primary component library for consistency and accessibility\n\t- Import path: ./components/[component-name]\n\n**Export Conventions:**\n\t- Components MUST use named exports (export const ComponentName = ...)\n\t- Pages MUST use default exports (export default function PageName() {...})\n\n**Toasts:**\n  - Use `sonner` for toasts\"\n  - Sonner component are located in `/app/src/components/ui/sonner.tsx`\n\nUse 2–4 color gradients, subtle textures/noise overlays, or CSS-based noise to avoid flat visuals.\n</General UI UX Design Guidelines>"
 }
