@@ -440,10 +440,29 @@ export default function TemplateEditorV2({ template, onClose, onSaved }) {
   // Domains = sections
   const [domains, setDomains] = useState(() => {
     const src = template?.domains || template?.sections || [];
+    // Type aliases: KN3 uses different type names → normalize to editor types
+    const TYPE_NORM = {
+      single_choice: "select", multi_choice: "multiselect",
+      yes_no: "yesno", scale_1_5: "scale", scale_1_10: "scale",
+      text_short: "text", text_long: "textarea",
+    };
     return src.map((d) => ({
       ...d,
       id: d.id || newId(),
-      questions: (d.questions || []).map((q) => ({ ...q, id: q.id || newId() })),
+      questions: (d.questions || []).map((q) => ({
+        ...q,
+        id: q.id || newId(),
+        // Normalize: KN3 uses 'prompt' key; editor uses 'text'
+        text: q.text && (q.text.id || q.text.en || typeof q.text === "string")
+          ? (typeof q.text === "string" ? { id: q.text, en: q.text } : q.text)
+          : (q.prompt && typeof q.prompt === "object"
+            ? q.prompt
+            : q.prompt
+              ? { id: q.prompt, en: q.prompt }
+              : { id: "", en: "" }),
+        // Normalize type aliases
+        type: TYPE_NORM[q.type] || q.type || "text",
+      })),
     }));
   });
 
