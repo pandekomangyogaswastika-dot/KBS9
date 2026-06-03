@@ -87,13 +87,14 @@ async def list_templates(_user=Depends(require_role("admin", "staff"))):
     out = []
     for d in docs:
         row = serialize_doc(d)
-        # count questions
         # Support both 'sections' (legacy) and 'domains' (KN3-style)
         sections = d.get("sections") or d.get("domains") or []
         total_q = sum(len(s.get("questions", [])) for s in sections)
         row["question_count"] = total_q
         row["section_count"] = len(sections)
         row["domain_count"] = len(sections)
+        # Normalize published flag: support both 'published' and 'is_published'
+        row["published"] = bool(d.get("published") or d.get("is_published"))
         out.append(row)
     return success_response(out)
 
@@ -285,8 +286,7 @@ async def list_sessions(limit: int = Query(100, ge=1, le=300), _user=Depends(req
         row["progress"] = progress
         row["share_url"] = f"/assessment/{s.get('token')}"
         row["is_new_submission"] = s.get("status") == "submitted" and not s.get("acknowledged_at")
-        row["template_name"] = tpl.get("name") if tpl else None
-        # Enrich with client user info
+        row["template_name"] = _localize_name(tpl.get("name")) if tpl else None
         cu = users_lookup.get(s.get("client_user_id"))
         row["client_user_name"] = cu.get("name") if cu else None
         row["client_user_email"] = cu.get("email") if cu else None
@@ -303,7 +303,10 @@ async def assessment_stats(_user=Depends(require_role("admin", "staff"))):
     new_subs = await db.assessment_sessions.count_documents({**flt, "status": "submitted", "acknowledged_at": None})
     latest = await db.assessment_sessions.find({**flt, "status": "submitted"}).sort("submitted_at", -1).limit(1).to_list(1)
     tpl_count = await db.assessment_templates.count_documents({"voided": {"$ne": True}})
-    published_count = await db.assessment_templates.count_documents({"voided": {"$ne": True}, "published": True})
+    published_count = await db.assessment_templates.count_documents({
+        "voided": {"$ne": True},
+        "$or": [{"published": True}, {"is_published": True}]
+    })
     return success_response({
         "total_sessions": total, "submitted_sessions": submitted, "draft_sessions": total - submitted,
         "new_submissions": new_subs,
@@ -382,10 +385,21 @@ async def my_assessments(user=Depends(require_role("client"))):
         row = serialize_doc(s)
         row["progress"] = progress
         row["share_url"] = f"/assessment/{s.get('token')}"
-        row["template_name"] = tpl.get("name") if tpl else None
-        row["template_description"] = tpl.get("description") if tpl else None
+        row["template_name"] = _localize_name(tpl.get("name")) if tpl else None
+        row["template_description"] = _localize_name(tpl.get("description")) if tpl else None
         out.append(row)
     return success_response(out)
+
+
+def _localize_name(name_field, locale="id"):
+    """Safely extract string from name field (string or dict)."""
+    if not name_field:
+        return None
+    if isinstance(name_field, str):
+        return name_field
+    if isinstance(name_field, dict):
+        return name_field.get(locale) or name_field.get("id") or name_field.get("en") or str(name_field)
+    return str(name_field)
 
 
 # ─── PUBLIC TOKEN-BASED FLOW ─────────────────────────────────────────────────

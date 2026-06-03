@@ -34,6 +34,8 @@ class KBS8APITester:
                 response = requests.get(url, headers=headers, timeout=10)
             elif method == 'POST':
                 response = requests.post(url, json=data, headers=headers, timeout=10)
+            elif method == 'PATCH':
+                response = requests.patch(url, json=data, headers=headers, timeout=10)
             elif method == 'PUT':
                 response = requests.put(url, json=data, headers=headers, timeout=10)
             elif method == 'DELETE':
@@ -307,7 +309,16 @@ class KBS8APITester:
             print(f"   ✅ Found {len(assessments)} assessments for client")
             if assessments:
                 for a in assessments:
+                    template_name = a.get('template_name')
+                    # Verify template_name is a string, not dict
+                    if isinstance(template_name, str):
+                        print(f"      ✅ template_name is string: {template_name}")
+                    else:
+                        print(f"      ❌ template_name is NOT string: {type(template_name)} - {template_name}")
                     print(f"      - {a.get('client_name')} ({a.get('status')})")
+                    # Store first session ID for further testing
+                    if not hasattr(self, 'client_session_id'):
+                        self.client_session_id = a.get('id')
         return success
 
     def test_session_detail(self):
@@ -335,6 +346,89 @@ class KBS8APITester:
             print(f"      Progress: {progress.get('percent', 0)}%")
             if domains:
                 print(f"      First domain: {domains[0].get('title', {}).get('id', 'N/A')}")
+        return success
+
+    def test_client_session_detail(self):
+        """Test client can access their session detail"""
+        if not self.client_token or not hasattr(self, 'client_session_id'):
+            print("   ⚠️  SKIPPED - No client token or session ID")
+            return False
+        
+        success, response = self.run_test(
+            "Client Session Detail",
+            "GET",
+            f"/api/assessment/sessions/{self.client_session_id}/detail",
+            200,
+            token=self.client_token,
+            description="Client fetches session detail with template and questions"
+        )
+        if success:
+            data = response.get('data', {})
+            template = data.get('template', {})
+            domains = template.get('domains', [])
+            progress = data.get('progress', {})
+            print(f"   ✅ Client session detail retrieved")
+            print(f"      Template: {template.get('name', {}).get('id', 'N/A')}")
+            print(f"      Domains: {len(domains)}")
+            print(f"      Progress: {progress.get('percent', 0)}%")
+            # Store first question ID for answer testing
+            if domains and domains[0].get('questions'):
+                self.test_question_id = domains[0]['questions'][0].get('id')
+                print(f"      First question ID: {self.test_question_id}")
+        return success
+
+    def test_save_answers(self):
+        """Test saving answers (auto-save functionality)"""
+        if not self.client_token or not hasattr(self, 'client_session_id') or not hasattr(self, 'test_question_id'):
+            print("   ⚠️  SKIPPED - No client token, session ID, or question ID")
+            return False
+        
+        success, response = self.run_test(
+            "Save Answers (Auto-save)",
+            "PATCH",
+            f"/api/assessment/sessions/{self.client_session_id}/answers",
+            200,
+            data=[
+                {
+                    "question_id": self.test_question_id,
+                    "value": "Test answer from backend test",
+                    "skipped": False
+                }
+            ],
+            token=self.client_token,
+            description="Test auto-save functionality by saving an answer"
+        )
+        if success:
+            saved_count = response.get('data', {}).get('saved', 0)
+            print(f"   ✅ Saved {saved_count} answer(s)")
+        return success
+
+    def test_admin_sessions_list(self):
+        """Test admin can see all sessions"""
+        if not self.admin_token:
+            print("   ⚠️  SKIPPED - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Admin Sessions List",
+            "GET",
+            "/api/assessment/sessions",
+            200,
+            token=self.admin_token,
+            description="Admin fetches all assessment sessions"
+        )
+        if success:
+            sessions = response.get('data', [])
+            print(f"   ✅ Found {len(sessions)} sessions")
+            if sessions:
+                for s in sessions[:3]:  # Show first 3
+                    template_name = s.get('template_name')
+                    # Verify template_name is a string, not dict
+                    if isinstance(template_name, str):
+                        print(f"      ✅ template_name is string: {template_name}")
+                    else:
+                        print(f"      ❌ template_name is NOT string: {type(template_name)} - {template_name}")
+                    print(f"      - {s.get('client_name')} ({s.get('status')})")
         return success
 
     def test_export_pdf(self):
@@ -442,6 +536,7 @@ def main():
     print("-" * 60)
     if admin_login_success:
         tester.test_assessment_templates_list()
+        tester.test_admin_sessions_list()
         tester.test_create_assessment_session()
         tester.test_session_detail()
         tester.test_export_pdf()
@@ -450,6 +545,8 @@ def main():
     
     if client_login_success:
         tester.test_client_assessments_list()
+        tester.test_client_session_detail()
+        tester.test_save_answers()
     else:
         print("⚠️  Skipping client assessment tests - client login failed")
 
