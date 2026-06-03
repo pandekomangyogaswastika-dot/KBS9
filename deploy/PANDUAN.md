@@ -50,7 +50,7 @@ sudo bash deploy/03-build-frontend.sh    # yarn install + yarn build
 sudo bash deploy/04-configure-server.sh  # systemd service + Nginx + start
 ```
 
-## Langkah 4 — Selesai
+## Langkah 4 — Selesai (HTTP)
 Buka di browser: `http://DOMAIN-ANDA`
 
 Login admin default:
@@ -58,6 +58,31 @@ Login admin default:
 - Password: `Admin#2026`
 
 > Segera GANTI password admin setelah login pertama.
+
+---
+
+## Langkah 5 (Opsional tapi Sangat Disarankan) — HTTPS / SSL
+
+> **Prasyarat:** Domain (bukan IP) sudah diarahkan ke VPS di DNS. Port 80 & 443 sudah dibuka di Hostinger hPanel > VPS > Firewall.
+
+```bash
+# Opsional: tambahkan email notifikasi SSL renewal di config.env
+nano deploy/config.env
+# LETS_ENCRYPT_EMAIL="nama@email.com"
+
+# Jalankan setup SSL
+sudo bash deploy/05-ssl.sh
+```
+
+Script ini akan:
+1. Install Certbot + plugin Nginx secara otomatis
+2. Verifikasi DNS sudah mengarah ke VPS
+3. Minta sertifikat Let's Encrypt gratis untuk domain Anda
+4. Konfigurasi Nginx: HTTP otomatis redirect ke HTTPS
+5. Aktifkan auto-renewal setiap 60–90 hari
+6. Rebuild frontend dengan URL HTTPS
+
+Setelah berhasil, akses aplikasi di: `https://DOMAIN-ANDA`
 
 ---
 
@@ -87,3 +112,7 @@ sudo systemctl reload nginx
 - **Halaman 502 Bad Gateway** → Backend belum jalan. Cek `journalctl -u kubus-backend -f`.
 - **Forbidden / 403 dari Nginx** → Repo di-clone di `/root`. Pindahkan ke `/opt/kubus`.
 - **Fitur AI error 503** → `ANTHROPIC_API_KEY` belum diisi di `deploy/config.env` (ini normal; situs tetap jalan).
+- **Certbot gagal: "Connection refused"** → Port 80/443 belum dibuka di Hostinger hPanel firewall. Tambahkan rule Allow TCP 80 dan Allow TCP 443, lalu klik **Synchronize**.
+- **Certbot gagal: "DNS problem"** → DNS A record belum propagasi. Tunggu 5–30 menit, cek dengan `dig +short DOMAIN-ANDA`.
+- **Sertifikat akan kadaluarsa** → Cek dengan `certbot certificates`. Renewal otomatis seharusnya sudah berjalan. Cek `systemctl status certbot.timer` atau `crontab -l`.
+- **Setelah SSL, API error** → Pastikan rebuild frontend sudah dilakukan (script 05-ssl.sh melakukan ini otomatis). Atau jalankan manual: `sudo bash deploy/03-build-frontend.sh`.

@@ -84,7 +84,8 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 - Object storage migration (S3/R2/Cloudflare) — abstraksi sudah ada (TD-008).
 - 4 demo repo lain (menunggu GitHub URL dari user).
 - Admin demo monitoring page — built Phase 16 P3.
-- Assessment auto-save optimization (debounce 700ms + pendingRef pattern) — P1, belum dikerjakan.
+- **Assessment auto-save optimization (debounce 700ms + pendingRef pattern)** — P1, done ✅
+- **SSL/HTTPS deploy script (`deploy/05-ssl.sh`)** — P1, done ✅
 
 ## Deployment Readiness (Juni 2026)
 - **Tujuan:** Self-host KBS9 ke VPS Hostinger (Ubuntu 24.04) dari GitHub.

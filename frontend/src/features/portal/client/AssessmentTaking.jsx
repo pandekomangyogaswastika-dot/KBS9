@@ -47,6 +47,8 @@ export default function AssessmentTaking() {
   const [saving, setSaving] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState(null);
   const saveTimerRef = useRef(null);
+  // pendingRef: always holds the latest changed answers without stale-closure risk
+  const pendingRef = useRef({});
 
   const isLocked = session?.status === "submitted";
 
@@ -71,24 +73,29 @@ export default function AssessmentTaking() {
 
   useEffect(() => { loadSessionDetail(); }, [loadSessionDetail]);
 
-  // Auto-save (debounced 3s)
+  // Auto-save (debounced 700ms) — reads pendingRef.current to avoid stale-closure data loss
   useEffect(() => {
     if (!isDirty || isLocked) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
-      if (Object.keys(changedAnswers).length === 0) { setIsDirty(false); return; }
+      const snapshot = { ...pendingRef.current };           // capture at fire time
+      if (Object.keys(snapshot).length === 0) { setIsDirty(false); return; }
       setSaving(true);
       try {
-        await api.patch(`/assessment/sessions/${sessionId}/answers`, Object.values(changedAnswers));
-        setChangedAnswers({});
-        setIsDirty(false);
+        await api.patch(`/assessment/sessions/${sessionId}/answers`, Object.values(snapshot));
+        // Remove only the keys we just saved (new answers may have arrived during the await)
+        pendingRef.current = Object.fromEntries(
+          Object.entries(pendingRef.current).filter(([k]) => !(k in snapshot))
+        );
+        setChangedAnswers({ ...pendingRef.current });
+        setIsDirty(Object.keys(pendingRef.current).length > 0);
         setLastSavedTime(new Date());
       } catch (err) {
         toast.error(apiError(err, "Gagal menyimpan jawaban"));
       } finally {
         setSaving(false);
       }
-    }, 3000);
+    }, 700);
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
   }, [isDirty, changedAnswers, sessionId, isLocked]);
 
@@ -123,7 +130,9 @@ export default function AssessmentTaking() {
       note: options.note ?? answersMap[questionId]?.note ?? null,
     };
     setAnswersMap((prev) => ({ ...prev, [questionId]: newAnswer }));
-    setChangedAnswers((prev) => ({ ...prev, [questionId]: newAnswer }));
+    // Sync pendingRef BEFORE state update — ensures timeout callback reads the latest data
+    pendingRef.current = { ...pendingRef.current, [questionId]: newAnswer };
+    setChangedAnswers({ ...pendingRef.current });
     setIsDirty(true);
   }, [answersMap]);
 
@@ -162,8 +171,11 @@ export default function AssessmentTaking() {
   const handleSubmit = useCallback(async () => {
     setSubmitting(true);
     try {
-      if (Object.keys(changedAnswers).length > 0) {
-        await api.patch(`/assessment/sessions/${sessionId}/answers`, Object.values(changedAnswers));
+      // Flush any pending answers before submit using pendingRef (not stale closure)
+      const pending = pendingRef.current;
+      if (Object.keys(pending).length > 0) {
+        await api.patch(`/assessment/sessions/${sessionId}/answers`, Object.values(pending));
+        pendingRef.current = {};
         setChangedAnswers({});
         setIsDirty(false);
       }
@@ -177,7 +189,7 @@ export default function AssessmentTaking() {
     } finally {
       setSubmitting(false);
     }
-  }, [changedAnswers, sessionId, loadSessionDetail]);
+  }, [sessionId, loadSessionDetail]);
 
   const handleExportPdf = useCallback(() => {
     const backendUrl = process.env.REACT_APP_BACKEND_URL || "";
