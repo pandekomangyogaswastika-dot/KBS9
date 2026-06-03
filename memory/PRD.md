@@ -58,3 +58,19 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 - Object storage migration (S3/R2/Cloudflare) — abstraksi sudah ada (TD-008).
 - 4 demo repo lain (menunggu GitHub URL dari user).
 - Admin demo monitoring page — built Phase 16 P3.
+- Assessment auto-save optimization (debounce 700ms + pendingRef pattern) — P1, belum dikerjakan.
+
+## Deployment Readiness (Juni 2026)
+- **Tujuan:** Self-host KBS9 ke VPS Hostinger (Ubuntu 24.04) dari GitHub.
+- **Selesai & teruji:**
+  - `emergentintegrations` dihapus sebagai hard dependency. Modul baru `backend/llm_client.py` auto-pilih
+    Anthropic SDK (ANTHROPIC_API_KEY, production) atau emergentintegrations (EMERGENT_LLM_KEY, dev).
+    4 caller AI di-refactor (routers/ai.py, routers/seo_ai.py, ai_report_service.py, services/assessment_ai_report.py).
+  - `anthropic==0.105.2` ditambah ke requirements.txt. Model: `claude-sonnet-4-6`.
+  - File usang dihapus: `ai_report_service_production.py` + 6 file .md deployment duplikat.
+  - Frontend build dikonfirmasi sukses via **yarn** (yarn.lock) — solusi error craco/ajv (yang muncul saat pakai npm).
+  - Script deployment idempotent di `deploy/` (01..04 + deploy.sh) + `deploy/config.env.example`.
+  - Backend production via systemd `kubus-backend` (uvicorn :8001) + Nginx (static frontend + proxy /api).
+  - Regression test: `backend/tests/test_llm_client.py` (3 passed).
+- **Cara pakai:** Save to GitHub → clone ke /opt/kubus di VPS → isi deploy/config.env → jalankan script 01-04.
+- **Catatan:** AI nonaktif aman tanpa ANTHROPIC_API_KEY (situs tetap jalan, endpoint AI balas 503, bukan crash).

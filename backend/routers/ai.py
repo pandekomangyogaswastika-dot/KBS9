@@ -179,18 +179,20 @@ def _build_prompt(payload: AdvisorIn | PortalChatIn) -> str:
     return f"{history_text}Pertanyaan pengguna: {payload.message}"
 
 
-async def _call_llm(api_key: str, session_id: str, system_msg: str, prompt: str) -> str:
-    try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-    except Exception:
-        raise HTTPException(status_code=503, detail={"code": "AI_PROVIDER_ERROR", "message": "AI library unavailable"})
+async def _call_llm(session_id: str, system_msg: str, prompt: str) -> str:
+    from llm_client import llm_complete, LLMNotConfigured
 
-    chat = LlmChat(api_key=api_key, session_id=session_id, system_message=system_msg).with_model(*MODEL)
     try:
-        reply = await chat.send_message(UserMessage(text=prompt))
+        return await llm_complete(
+            system_message=system_msg,
+            user_text=prompt,
+            session_id=session_id,
+            max_tokens=1200,
+        )
+    except LLMNotConfigured:
+        raise HTTPException(status_code=503, detail={"code": "AI_PROVIDER_ERROR", "message": "AI key not configured"})
     except Exception as exc:
         raise HTTPException(status_code=502, detail={"code": "AI_PROVIDER_ERROR", "message": f"AI error: {exc}"})
-    return str(reply)
 
 
 def _parse_ctas(reply: str) -> dict:
@@ -205,14 +207,11 @@ def _parse_ctas(reply: str) -> dict:
 
 @router.post("/ai/advisor")
 async def ai_advisor(payload: AdvisorIn):
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
-    if not api_key:
-        raise HTTPException(status_code=503, detail={"code": "AI_PROVIDER_ERROR", "message": "AI key not configured"})
     db = get_db()
     session_id = payload.session_id or new_id()
     system_msg = await _build_public_grounding(db)
     prompt = _build_prompt(payload)
-    raw_reply = await _call_llm(api_key, f"public-{session_id}", system_msg, prompt)
+    raw_reply = await _call_llm(f"public-{session_id}", system_msg, prompt)
     result = _parse_ctas(raw_reply)
     await _log_conversation(db, session_id, "public", None, None, payload.message, result["reply"])
     return success_response({"session_id": session_id, "reply": result["reply"],
@@ -224,14 +223,11 @@ async def ai_advisor(payload: AdvisorIn):
 
 @router.post("/ai/portal")
 async def ai_portal(payload: PortalChatIn, user=Depends(get_current_user)):
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
-    if not api_key:
-        raise HTTPException(status_code=503, detail={"code": "AI_PROVIDER_ERROR", "message": "AI key not configured"})
     db = get_db()
     session_id = payload.session_id or new_id()
     system_msg = await _build_portal_grounding(db, user)
     prompt = _build_prompt(payload)
-    raw_reply = await _call_llm(api_key, f"portal-{session_id}-{user['id']}", system_msg, prompt)
+    raw_reply = await _call_llm(f"portal-{session_id}-{user['id']}", system_msg, prompt)
     result = _parse_ctas(raw_reply)
     await _log_conversation(db, session_id, "portal", user["id"], user["role"], payload.message, result["reply"])
     return success_response({"session_id": session_id, "reply": result["reply"],

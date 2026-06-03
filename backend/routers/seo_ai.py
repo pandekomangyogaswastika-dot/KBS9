@@ -1,10 +1,7 @@
 """
 SEO AI Router — AI-Powered SEO Features using Claude
 Phase 11.B: Generate meta, analyze content, extract keywords, generate alt text
-
-Uses Emergent LLM Key for Claude Sonnet 4 access.
 """
-import os
 import uuid
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Body
@@ -48,25 +45,20 @@ class AltTextRequest(BaseModel):
     locale: str = "id"
 
 
-# Helper: Call Claude using LlmChat
+# Helper: Call Claude using the unified LLM client
 async def call_claude(prompt: str, session_id: str = "seo-ai") -> str:
-    """Call Claude using Emergent integrations"""
+    """Call Claude via unified client (Anthropic SDK in prod, Emergent in dev)."""
+    from llm_client import llm_complete, LLMNotConfigured
+
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-    except Exception:
-        raise HTTPException(status_code=503, detail="AI library unavailable")
-    
-    api_key = os.environ.get("EMERGENT_LLM_KEY", "sk-emergent-87e9d673b3cF1D9B63")
-    
-    chat = LlmChat(
-        api_key=api_key,
-        session_id=session_id,
-        system_message="You are an expert SEO consultant. Always return responses as valid JSON."
-    ).with_model("anthropic", "claude-sonnet-4-20250514")
-    
-    try:
-        reply = await chat.send_message(UserMessage(text=prompt))
-        return str(reply)
+        return await llm_complete(
+            system_message="You are an expert SEO consultant. Always return responses as valid JSON.",
+            user_text=prompt,
+            session_id=session_id,
+            max_tokens=1500,
+        )
+    except LLMNotConfigured:
+        raise HTTPException(status_code=503, detail="AI key not configured")
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"AI error: {exc}")
 

@@ -2,25 +2,21 @@
 
 Generates structured, per-domain AI insights using Claude 3.5 Sonnet via Emergent LLM.
 """
-import os
-import asyncio
 from typing import Dict, List, Any, Optional
 from dotenv import load_dotenv
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from llm_client import llm_complete
 import json
 
 load_dotenv()
-
-EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY")
 
 
 class AIReportGenerator:
     """Generate AI-powered insights for completed assessments."""
 
     def __init__(self):
-        self.api_key = EMERGENT_LLM_KEY
-        if not self.api_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment")
+        # No key validation here: llm_complete() resolves the provider at call
+        # time and raises gracefully if nothing is configured.
+        pass
 
     async def generate_report(self, session_data: Dict[str, Any], locale: str = "id") -> Dict[str, Any]:
         """
@@ -93,18 +89,12 @@ class AIReportGenerator:
 
         # Call Claude for analysis
         try:
-            chat = (
-                LlmChat(
-                    api_key=self.api_key,
-                    session_id=f"assessment-domain-{domain.get('id')}",
-                    system_message=system_prompt,
-                )
-                .with_model("anthropic", "claude-sonnet-4-6")
-                .with_params(max_tokens=2000)
+            response = await llm_complete(
+                system_message=system_prompt,
+                user_text=user_prompt,
+                session_id=f"assessment-domain-{domain.get('id')}",
+                max_tokens=2000,
             )
-
-            user_message = UserMessage(text=user_prompt)
-            response = await chat.send_message(user_message)
 
             # Parse structured response
             parsed = self._parse_domain_response(response, domain_title)
@@ -130,18 +120,12 @@ class AIReportGenerator:
         user_prompt = self._build_summary_prompt(template_name, client_name, domain_insights, locale)
 
         try:
-            chat = (
-                LlmChat(
-                    api_key=self.api_key,
-                    session_id=f"assessment-summary-{template_name}",
-                    system_message=system_prompt,
-                )
-                .with_model("anthropic", "claude-sonnet-4-6")
-                .with_params(max_tokens=1500)
+            response = await llm_complete(
+                system_message=system_prompt,
+                user_text=user_prompt,
+                session_id=f"assessment-summary-{template_name}",
+                max_tokens=1500,
             )
-
-            user_message = UserMessage(text=user_prompt)
-            response = await chat.send_message(user_message)
 
             return self._parse_summary_response(response)
 
@@ -188,8 +172,6 @@ class AIReportGenerator:
 
     def _build_domain_analysis_prompt(self, domain_title: str, qa_pairs: List[Dict], locale: str) -> str:
         """Build prompt for domain-specific analysis."""
-        lang = "English" if locale == "en" else "Indonesian"
-
         prompt = f"""Analyze the following assessment responses for domain: **{domain_title}**
 
 **Responses:**

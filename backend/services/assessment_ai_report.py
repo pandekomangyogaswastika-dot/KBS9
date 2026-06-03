@@ -1,6 +1,5 @@
-"""Assessment AI Report generation service using Claude via emergentintegrations."""
+"""Assessment AI Report generation service (Claude via unified llm_client)."""
 import json
-import os
 from typing import Optional
 
 
@@ -151,25 +150,16 @@ async def generate_ai_report(
     db=None,
 ) -> Optional[dict]:
     """Generate AI report using Claude. Returns report dict or None on failure."""
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
-    if not api_key:
-        raise ValueError("EMERGENT_LLM_KEY not configured")
-
-    try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-    except ImportError:
-        raise RuntimeError("emergentintegrations not installed")
-
     prompt = _build_prompt(template, answers_map, report_type)
 
-    chat = LlmChat(
-        api_key=api_key,
-        session_id=f"assess-report-{session_id}",
-        system_message="You are a professional business technology consultant. Always respond with valid JSON only.",
-    ).with_model("anthropic", "claude-sonnet-4-5")
+    from llm_client import llm_complete
 
-    response = await chat.send_message(UserMessage(content=prompt))
-    raw_text = response.text if hasattr(response, "text") else str(response)
+    raw_text = await llm_complete(
+        system_message="You are a professional business technology consultant. Always respond with valid JSON only.",
+        user_text=prompt,
+        session_id=f"assess-report-{session_id}",
+        max_tokens=3000,
+    )
 
     # Parse JSON response
     content = {}
