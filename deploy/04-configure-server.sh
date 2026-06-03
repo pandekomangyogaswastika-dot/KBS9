@@ -29,7 +29,7 @@ After=network.target mongod.service
 [Service]
 Type=simple
 WorkingDirectory=${REPO_DIR}/backend
-ExecStart=${REPO_DIR}/backend/venv/bin/uvicorn server:app --host 127.0.0.1 --port 8001 --workers 2
+ExecStart=${REPO_DIR}/backend/venv/bin/uvicorn server:app --host 127.0.0.1 --port 8001 --workers 1
 Restart=always
 RestartSec=5
 
@@ -80,6 +80,16 @@ chmod -R o+rX "${REPO_DIR}/frontend/build"
 
 nginx -t
 systemctl reload nginx
+
+# Buka firewall untuk HTTP/HTTPS/SSH (jika ufw aktif)
+if command -v ufw >/dev/null 2>&1; then
+  ufw allow OpenSSH >/dev/null 2>&1 || true
+  ufw allow 80/tcp   >/dev/null 2>&1 || true
+  ufw allow 443/tcp  >/dev/null 2>&1 || true
+  echo "[i] Aturan ufw 80/443/SSH ditambahkan (jika ufw aktif)."
+fi
+echo "[PENTING] Jika situs tetap tidak bisa diakses dari browser, BUKA port 80 & 443"
+echo "          di panel firewall Hostinger (hPanel > VPS > Firewall)."
 
 echo ""
 echo "================================================================"
