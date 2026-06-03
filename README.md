@@ -23,11 +23,20 @@ KBS8 (Kubus Teknologi Indonesia) adalah platform enterprise untuk:
 
 ### ⚡ Copy-Paste Ready Commands!
 
-**📋 [DEPLOYMENT_COMMANDS.md](./DEPLOYMENT_COMMANDS.md)** ← **Semua command tinggal copy-paste!**
+**Pilih dokumentasi sesuai Ubuntu version:**
+
+| Ubuntu Version | Documentation |
+|----------------|---------------|
+| **Ubuntu 24.04 LTS** | 🔥 [DEPLOYMENT_UBUNTU_24.04.md](./DEPLOYMENT_UBUNTU_24.04.md) ← **RECOMMENDED** |
+| Ubuntu 20.04/22.04 | [DEPLOYMENT_COMMANDS.md](./DEPLOYMENT_COMMANDS.md) |
 
 ### Option 1: Step-by-Step Copy-Paste (Recommended)
 
-Ikuti **[DEPLOYMENT_COMMANDS.md](./DEPLOYMENT_COMMANDS.md)** - Semua command sudah siap copy-paste!
+**Untuk Ubuntu 24.04 LTS:**
+Ikuti **[DEPLOYMENT_UBUNTU_24.04.md](./DEPLOYMENT_UBUNTU_24.04.md)** - Optimized untuk Python 3.12!
+
+**Untuk Ubuntu 20.04/22.04:**
+Ikuti **[DEPLOYMENT_COMMANDS.md](./DEPLOYMENT_COMMANDS.md)** - Untuk Python 3.10
 
 **12 Steps mudah:**
 1. SSH & Update → copy-paste ✓
@@ -62,10 +71,12 @@ sudo bash deploy.sh
 ```
 
 **📚 Dokumentasi Lengkap:**
-- 🔥 [**DEPLOYMENT_COMMANDS.md**](./DEPLOYMENT_COMMANDS.md) - **Copy-paste ready commands!**
+- 🔥 [**DEPLOYMENT_UBUNTU_24.04.md**](./DEPLOYMENT_UBUNTU_24.04.md) - **Ubuntu 24.04 LTS (NEW!)**
+- [**DEPLOYMENT_COMMANDS.md**](./DEPLOYMENT_COMMANDS.md) - Ubuntu 20.04/22.04
 - [**QUICK_DEPLOY.md**](./QUICK_DEPLOY.md) - Quick start guide
 - [**DEPLOYMENT_HOSTINGER.md**](./DEPLOYMENT_HOSTINGER.md) - Full guide + troubleshooting
 
+**✅ Support:** Ubuntu 20.04, 22.04, **24.04 LTS**  
 **⚠️ TIDAK pakai library `emergent`!** Sudah diganti dengan Anthropic SDK langsung.
 
 ---
