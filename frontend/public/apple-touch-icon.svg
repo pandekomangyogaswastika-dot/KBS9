@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="ga1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C68E1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B49C9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="ga2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9580F0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C68E1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="ga3" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#4A3BA8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B49C9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" fill="#7C68E1" rx="40"/>
+  <polygon points="90,40 135,65 90,90 45,65" fill="url(#ga1)" stroke="#2D2065" stroke-width="2"/>
+  <polygon points="135,65 135,115 90,140 90,90" fill="url(#ga2)" stroke="#2D2065" stroke-width="2"/>
+  <polygon points="45,65 45,115 90,140 90,90" fill="url(#ga3)" stroke="#2D2065" stroke-width="2"/>
+  <line x1="90" y1="40" x2="90" y2="90" stroke="#B8A7FF" stroke-width="1" opacity="0.6"/>
+</svg>

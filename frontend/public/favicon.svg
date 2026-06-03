@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C68E1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B49C9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9580F0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C68E1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad3" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#4A3BA8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B49C9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Kubus 3D -->
+  <!-- Top face -->
+  <polygon points="50,15 80,30 50,45 20,30" fill="url(#grad1)" stroke="#2D2065" stroke-width="1.5"/>
+  
+  <!-- Right face -->
+  <polygon points="80,30 80,65 50,80 50,45" fill="url(#grad2)" stroke="#2D2065" stroke-width="1.5"/>
+  
+  <!-- Left face -->
+  <polygon points="20,30 20,65 50,80 50,45" fill="url(#grad3)" stroke="#2D2065" stroke-width="1.5"/>
+  
+  <!-- Highlight pada edges -->
+  <line x1="50" y1="15" x2="50" y2="45" stroke="#B8A7FF" stroke-width="0.5" opacity="0.6"/>
+  <line x1="20" y1="30" x2="50" y2="45" stroke="#B8A7FF" stroke-width="0.5" opacity="0.4"/>
+  <line x1="80" y1="30" x2="50" y2="45" stroke="#B8A7FF" stroke-width="0.5" opacity="0.4"/>
+</svg>
