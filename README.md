@@ -21,34 +21,52 @@ KBS8 (Kubus Teknologi Indonesia) adalah platform enterprise untuk:
 
 ## 🚀 Quick Start Deployment
 
-### Option 1: Auto Deployment (5 menit)
+### ⚡ Copy-Paste Ready Commands!
+
+**📋 [DEPLOYMENT_COMMANDS.md](./DEPLOYMENT_COMMANDS.md)** ← **Semua command tinggal copy-paste!**
+
+### Option 1: Step-by-Step Copy-Paste (Recommended)
+
+Ikuti **[DEPLOYMENT_COMMANDS.md](./DEPLOYMENT_COMMANDS.md)** - Semua command sudah siap copy-paste!
+
+**12 Steps mudah:**
+1. SSH & Update → copy-paste ✓
+2. Install Dependencies → copy-paste ✓  
+3. Create User → copy-paste ✓
+4. Upload Project → copy-paste ✓
+5. Setup Backend → copy-paste ✓
+6. Setup Frontend → copy-paste ✓
+7. Setup Supervisor → copy-paste ✓
+8. Setup Nginx → copy-paste ✓
+9. Setup SSL → copy-paste ✓
+10. Setup Firewall → copy-paste ✓
+11. Create Admin → copy-paste ✓
+12. Test & Verify → copy-paste ✓
+
+**Total waktu: 15-20 menit** ⚡
+
+### Option 2: Auto Deployment Script
 
 ```bash
-# 1. SSH ke VPS Hostinger
+# 1. SSH & clone
 ssh root@YOUR_VPS_IP
-
-# 2. Clone repository
 git clone https://github.com/pandekomangyogaswastika-dot/KBS8.git
 cd KBS8
 
-# 3. Run deployment script
+# 2. Run script
 sudo bash deploy.sh
 
-# 4. Follow prompts untuk domain & SSL setup
-
-# 5. Configure .env files (MongoDB, JWT, domain)
-nano /home/kbs8/KBS8/backend/.env
-nano /home/kbs8/KBS8/frontend/.env
-
-# 6. Restart services
-sudo supervisorctl restart all
-
-# 7. Access: https://yourdomain.com
+# 3. Follow prompts
+# 4. Edit .env files
+# 5. Restart: sudo supervisorctl restart all
 ```
 
 **📚 Dokumentasi Lengkap:**
-- [**QUICK_DEPLOY.md**](./QUICK_DEPLOY.md) - Quick start guide (5 menit)
-- [**DEPLOYMENT_HOSTINGER.md**](./DEPLOYMENT_HOSTINGER.md) - Full deployment guide dengan troubleshooting
+- 🔥 [**DEPLOYMENT_COMMANDS.md**](./DEPLOYMENT_COMMANDS.md) - **Copy-paste ready commands!**
+- [**QUICK_DEPLOY.md**](./QUICK_DEPLOY.md) - Quick start guide
+- [**DEPLOYMENT_HOSTINGER.md**](./DEPLOYMENT_HOSTINGER.md) - Full guide + troubleshooting
+
+**⚠️ TIDAK pakai library `emergent`!** Sudah diganti dengan Anthropic SDK langsung.
 
 ---
 
