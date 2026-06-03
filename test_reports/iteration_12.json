@@ -110,8 +110,8 @@
     }
   },
   "environment": {
-    "app_url": "https://kbs8-system.preview.emergentagent.com",
-    "backend_url": "https://kbs8-system.preview.emergentagent.com",
+    "app_url": "https://kbs9-production.preview.emergentagent.com",
+    "backend_url": "https://kbs9-production.preview.emergentagent.com",
     "test_date": "2026-06-02",
     "platform": "KBS8 - Kubus Teknologi Indonesia",
     "stack": "FastAPI + React + MongoDB"

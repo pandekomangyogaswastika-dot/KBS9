@@ -34,7 +34,7 @@ async def get_sitemap():
     db = get_db()
     
     # Get base URL from environment or hardcode for now
-    base_url = os.environ.get("BASE_URL", "https://kbs-mapping-setup.preview.emergentagent.com")
+    base_url = os.environ.get("BASE_URL", "https://kbs9-production.preview.emergentagent.com")
     
     # Start XML
     xml_lines = [
@@ -145,7 +145,7 @@ async def get_robots():
     - Disallow assessment token pages (optional - can make indexed)
     - Point to sitemap
     """
-    base_url = os.environ.get("BASE_URL", "https://kbs-mapping-setup.preview.emergentagent.com")
+    base_url = os.environ.get("BASE_URL", "https://kbs9-production.preview.emergentagent.com")
     
     robots_content = f"""User-agent: *
 Disallow: /portal/
