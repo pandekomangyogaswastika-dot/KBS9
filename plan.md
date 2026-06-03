@@ -14,7 +14,7 @@
 > ✅ Admin login berfungsi dan dashboard menampilkan semua data.
 
 ### Phase 4.7 — Garment Serial Tracking Demo ✅
-> ✅ Demo stateless/hardcoded diekstrak dari `garmentyanathisfinal`
+> ✅ Demo stateless/hardcoded dieksekstrak dari `garmentyanathisfinal`
 > ✅ Backend router `/api/demos/garment-serial/*` (serial-list, serial-trace, meta) — 12 serials, 10 products
 > ✅ Frontend `/demo/garment-serial` — GarmentSerialDemoApp + SerialTrackingPanel (Daftar Serial + Trace Timeline)
 > ✅ CMS case `garment-serial-tracking` terhubung: click "Mulai Demo Gratis" → direct navigate ke demo
@@ -77,44 +77,35 @@
 
 ### D. Phase 21: Quick Wins + Assessment V2 (KN3 Clone) ✅
 - Phase 21A (Quick Wins) **selesai**.
-- Phase 21B (Assessment V2 / KN3 Clone) **selesai** dan **teruji end-to-end**:
-  - UX pengisian assessment ala KN3 (domain-based)
-  - Branching/show_if (default-show)
-  - Autosave debounce (±3 detik)
-  - Notes per question
-  - Skip/Clear
-  - Attachments per question (upload/delete/validasi/limit)
-  - Submit flow + lock state
-  - Full integrasi ke backend endpoints existing `/api/assessment/*`
+- Phase 21B (Assessment V2 / KN3 Clone) **selesai** dan **teruji end-to-end**.
 
 ### E. Phase 21C: AI Reporting Enhancements ✅
-- AI reporting untuk assessment yang sudah disubmit, dengan karakteristik:
-  - **Manual trigger** (user memilih generate report)
-  - **Structured output** (JSON) + **per-domain analysis**
-  - **Generate on-the-fly** (tanpa caching di DB)
-  - Bilingual (ID/EN)
-  - PDF export bisa di-enhance dengan AI insights melalui query param
+- AI reporting untuk assessment yang sudah disubmit (manual trigger, structured JSON, bilingual, on-the-fly).
 
 ### F. UI Consistency Mini-Fix (P2) ✅
 - Eliminasi native browser dialog (`window.confirm`, `window.prompt`) pada AdminProjects → diganti Shadcn AlertDialog/Dialog.
 
 ### G. Quality Gate: Comprehensive Testing ✅
 - Assessment V2 + AdminProjects comprehensive testing: **Backend 29/29 passed**, Frontend verified.
-- Phase 21C AI Reporting: E2E test via UI passed.
 
 ### H. Hardening / Maintenance ✅
-- Fix warning chart container size (width/height -1) dengan memastikan container punya ukuran minimal.
+- Fix warning chart container size (width/height -1).
 - Frontend compile clean (no errors).
+
+### I. Deployment Readiness (NEW — P0)
+**Tujuan baru berdasarkan diskusi terbaru:**
+- Menyediakan **deployment guide yang final, professional, dan copy‑paste ready** untuk VPS (khususnya Hostinger) di **Ubuntu 24.04 LTS**.
+- Menghilangkan seluruh ketergantungan **Emergent-only** untuk production:
+  - Python: `emergentintegrations` tidak boleh menjadi dependency wajib.
+  - Frontend: menghapus script tracking/badge Emergent dari `public/index.html`.
+- Menyediakan jalur deployment **tanpa domain** (pakai **IP VPS**) + pilihan DB **MongoDB local**.
+- Menutup gap dependency pada frontend (npm peer deps / ajv / zxing) dengan guidance yang deterministic.
 
 ### Non-functional
 - Tidak mematahkan fitur existing (public pages, admin, client portal)
 - Performance aman, responsif mobile, aksesibilitas
 - Elemen interaktif krusial memiliki `data-testid`
-- Styling mengikuti `/app/design_guidelines.md`:
-  - Dark-only + glassmorphism
-  - Hindari `transition: all`
-  - Gradients hanya untuk background accents (≤20% viewport)
-  - Gunakan shadcn/ui untuk dialog/tooltip/inputs
+- Styling mengikuti `/app/design_guidelines.md`
 
 ---
 
@@ -157,27 +148,16 @@
 - ✅ Comprehensive testing selesai
 
 ### 21B.0 — Prinsip Implementasi (final)
-- **Clean integration**: tidak membuat router `/api/assessment-v2` baru; gunakan endpoints existing di `/api/assessment`:
-  - `GET /api/assessment/sessions/{session_id}/detail`
-  - `PATCH /api/assessment/sessions/{session_id}/answers`
-  - `POST /api/assessment/sessions/{session_id}/submit`
-  - `POST /api/assessment/sessions/{session_id}/attachments`
-  - `DELETE /api/assessment/sessions/{session_id}/attachments/{attachment_id}`
-  - `GET /api/assessment/{token}/export?locale=id|en`
-- **Port UX dari KN3**:
-  - Branching default-show
-  - Other sentinel `__other__` + `other_text`
-  - Notes per question + skip toggle + clear
-  - Autosave debounce (±3 detik)
+- **Clean integration**: tidak membuat router `/api/assessment-v2` baru; gunakan endpoints existing di `/api/assessment`.
+- **Port UX dari KN3**: branching default-show, other sentinel `__other__`, notes, skip/clear, autosave, attachments.
 
 ### 21B.1 — Frontend Client: Assessment Taking (P0) ✅ DONE
 #### Deliverable (achieved)
-Client dapat membuka session detail dan mengisi assessment end-to-end dengan:
 - ✅ Domain navigation
 - ✅ Progress per domain + overall
 - ✅ Branching/show_if
 - ✅ Autosave debounce 3 detik (batch PATCH)
-- ✅ Attachments per question (upload/list/delete, max 5) + validasi tipe/ukuran
+- ✅ Attachments per question
 - ✅ Notes per question
 - ✅ Skip/Clear
 - ✅ Submit & lock state
@@ -185,13 +165,6 @@ Client dapat membuka session detail dan mengisi assessment end-to-end dengan:
 #### Testing (FINAL — Comprehensive)
 - ✅ Report: `/app/test_reports/iteration_11.json`
 - ✅ Backend: **29/29 tests passed (100%)**
-- ✅ Frontend: Semua fitur Assessment V2 verified working
-
-#### Critical Bug Found & Fixed ✅
-- **Bug:** `storage.save()` dipanggil dengan parameter salah (mengakibatkan upload attachment 500)
-- **Fix:** koreksi signature menjadi `storage.save(raw, ext)` di 3 lokasi
-- **File:** `backend/routers/assessment.py` (lines sekitar 356, 515, 708)
-- **Status:** FIXED & VERIFIED BY TESTS
 
 ---
 
@@ -199,73 +172,14 @@ Client dapat membuka session detail dan mengisi assessment end-to-end dengan:
 
 ### Implementation (final)
 1) (NEW) `frontend/src/features/admin/pages/components/ConfirmDialog.jsx` ✅
-- Reusable shadcn `AlertDialog`
-
 2) (UPDATE) `frontend/src/features/admin/pages/AdminProjects.jsx` ✅
-- Replace semua `window.confirm` dengan `ConfirmDialog`
-- Replace `window.prompt` dengan shadcn `Dialog` + `Textarea` untuk feedback
-
-### Extra Fix (unplanned but required)
-- ✅ `frontend/src/features/admin/pages/AdminDemoSessions.jsx`
-  - Fix import: `apiClient` → `api` agar build frontend tidak error
 
 ---
 
 ## Phase 21C — AI Reporting Enhancements ✅ COMPLETE
 
 ### 21C.0 — Prinsip Implementasi (final)
-- Manual trigger (tidak auto-generate pada submit)
-- Structured JSON output
-- Per-domain analysis + overall executive summary
-- Generate on-the-fly (no caching)
-- Bilingual (ID/EN)
-- PDF export bisa include AI via query param `include_ai=true`
-
-### 21C.1 — Backend: AI Report Service ✅ DONE
-- ✅ (NEW) `backend/ai_report_service.py`
-  - Integrasi Claude 3.5 Sonnet via `emergentintegrations`
-  - Per-domain analysis:
-    - strengths, concerns
-    - maturity_score 1-5 + maturity_label
-    - recommendations
-  - Overall summary:
-    - summary (2-3 paragraf)
-    - key_findings
-    - next_steps
-  - Error handling + JSON parsing guard
-
-### 21C.2 — Backend: API Endpoints ✅ DONE
-- ✅ `POST /api/assessment/sessions/{session_id}/generate-report?locale=id|en`
-  - Validasi session harus submitted
-  - Access control: admin/staff/client (client hanya session miliknya)
-  - Menghasilkan report on-the-fly
-
-- ✅ Enhanced PDF:
-  - `GET /api/assessment/{token}/export?locale=id|en&include_ai=true`
-  - Jika `include_ai=true`, AI report di-generate on-the-fly dan disisipkan ke PDF
-
-### 21C.3 — PDF Enhancement ✅ DONE
-- ✅ (UPDATE) `backend/assessment_pdf.py`
-  - `_build_ai_section` diperbarui untuk layout professional:
-    - Executive summary, key findings
-    - Per-domain insights: strengths/concerns/recommendations + maturity badge
-    - Strategic next steps + priority actions
-    - Disclaimer
-
-### 21C.4 — Frontend: AI Report UI ✅ DONE
-- ✅ (NEW) `frontend/src/features/portal/client/components/AIReportDialog.jsx`
-  - 3-state UI (initial → loading → results)
-  - Structured display (per-domain cards + maturity badges)
-  - CTA: download PDF with AI insights
-- ✅ (UPDATE) `frontend/src/features/portal/client/ClientAssessments.jsx`
-  - Tambah tombol `AI Report` untuk assessment submitted
-
-### 21C.5 — Testing ✅ DONE
-- ✅ E2E UI test passed:
-  - AI report generated (≈30-60s)
-  - Per-domain insights tampil (maturity badge, strengths, concerns, recommendations)
-  - Toast success tampil
-- Catatan minor (non-blocking): fallback summary bisa ter-trigger pada kondisi tertentu; per-domain tetap OK.
+- Manual trigger, structured JSON, per-domain analysis, bilingual, on-the-fly.
 
 ---
 
@@ -273,24 +187,73 @@ Client dapat membuka session detail dan mengisi assessment end-to-end dengan:
 
 ### H.1 — Fix Chart Warning (width/height -1) ✅ DONE
 - ✅ (UPDATE) `frontend/src/features/admin/pages/AdminAnalytics.jsx`
-  - Tambah wrapper `min-h-[220px]` pada `ChartCard` agar `ResponsiveContainer` selalu punya size.
 
-### H.2 — Build Hygiene & Optimization ✅ DONE
-- ✅ Frontend compile clean (no errors)
-- ✅ Struktur komponen mengikuti best practices
+---
+
+## Phase 22 — Deployment Hardening & VPS Guide (NEW — P0)
+
+### Status (as of 2026-06-03)
+- ✅ Draft docs created: `DEPLOYMENT_HOSTINGER.md`, `QUICK_DEPLOY.md`, `DEPLOYMENT_COMMANDS.md`, `DEPLOYMENT_UBUNTU_24.04.md`
+- ✅ Branding update (title + favicon + remove Emergent scripts) implemented in frontend.
+- ⚠️ Deployment experience on VPS found issues:
+  - `emergentintegrations` is not installable on generic Ubuntu → must be removed or optional.
+  - Frontend build: dependency conflicts (`@zxing/*` peer deps + AJV missing module).
+  - Copy/paste long command blocks caused user error; require modular scripts + checkpoints.
+
+### 22.1 — Backend Dependencies: Remove Emergent-only library (P0)
+**Goal:** Production install must succeed on Ubuntu 24.04.
+- [ ] Remove `emergentintegrations==0.1.2` from `backend/requirements.txt`.
+- [ ] Keep AI optional using `anthropic` SDK.
+- [ ] Ensure `assessment_ai_report.py` uses production-safe code path (no emergent import required at import-time).
+
+### 22.2 — Frontend Dependencies: Deterministic build (P0)
+**Goal:** `npm install` + `npm run build` must succeed on Node LTS without manual trial-and-error.
+- [ ] Resolve `@zxing/browser` ↔ `@zxing/library` mismatch (pin compatible versions or remove unused dependency).
+- [ ] Fix AJV/ajv-keywords mismatch:
+  - pin `ajv@8` and `ajv-keywords@5` (or compatible set) as explicit dependencies.
+- [ ] Update docs to enforce one approach:
+  - `npm ci --legacy-peer-deps` (preferred) OR pin versions in `package-lock.json` and commit.
+
+### 22.3 — Deployment Guides: Final & Tested on Ubuntu 24.04 (P0)
+**Goal:** A single document that works end-to-end.
+- [ ] Consolidate into one canonical guide:
+  - `DEPLOYMENT_UBUNTU_24.04_FINAL.md`
+- [ ] Provide two supported modes:
+  1) **No domain**: HTTP via IP VPS, no SSL.
+  2) **With domain**: HTTPS via certbot.
+- [ ] Provide MongoDB options:
+  - MongoDB local (recommended for quick start)
+  - MongoDB Atlas (recommended for managed)
+
+### 22.4 — Deployment Script: Safe, modular, idempotent (P0)
+**Goal:** Reduce human error.
+- [ ] Create `scripts/vps/00_prereq.sh`, `01_backend.sh`, `02_frontend.sh`, `03_mongo_local.sh`, `04_supervisor.sh`, `05_nginx_ip.sh`, `06_nginx_domain_ssl.sh`, `07_verify.sh`.
+- [ ] Each script:
+  - prints what it will do
+  - exits on error
+  - checks current state (idempotent)
+
+### 22.5 — Verification Checklist (P0)
+- [ ] Provide copy-paste health checks:
+  - `curl http://localhost:8001/api/health`
+  - `curl -I http://localhost` (nginx)
+  - `supervisorctl status`
+  - MongoDB connectivity check.
 
 ---
 
 ## 3) Next Actions (Updated)
 
-### Immediate Next
-- Tidak ada P0/P1 tersisa untuk Phase 21.
+### Immediate Next (P0)
+1) Finalize production dependencies:
+   - Remove `emergentintegrations` from backend requirements.
+   - Make AI feature optional (`ANTHROPIC_API_KEY`).
+2) Fix frontend build deterministically (zxing + ajv).
+3) Produce **FINAL deployment doc + modular scripts**, tested on Ubuntu 24.04 LTS.
 
-### Optional / Future
-1) **Template customization untuk AI report (admin-configurable)**
-2) Caching AI report (opsional) bila volume tinggi
-3) Polishing summary prompt agar fallback semakin jarang
-4) Dokumentasi teknis tambahan untuk AI report + PDF (jika diperlukan)
+### Optional / Future (P1)
+1) TD-008: migrate object storage from local to S3/R2/Cloudflare.
+2) Standardize deployment using Docker Compose (optional).
 
 ---
 
@@ -301,73 +264,37 @@ Client dapat membuka session detail dan mengisi assessment end-to-end dengan:
 - UI/UX Overhaul 2026 tercapai. ✅
 - Demo parity + Garment serial demo stable. ✅
 
-### Phase 21A success criteria
-- Quick wins tuntas dan verified. ✅
-
 ### Phase 21B success criteria (FINAL)
-- Client bisa mengisi assessment dari portal dengan UX setara KN3:
-  - ✅ Multi tipe pertanyaan
-  - ✅ Branching/show_if
-  - ✅ Autosave
-  - ✅ Skip/clear + note
-  - ✅ Attachment per question (upload/delete/validasi/limit)
-  - ✅ Submit + locked state
-- Endpoint backend existing tetap digunakan (minim risiko). ✅
-- Comprehensive testing lulus:
-  - ✅ Backend 29/29 tests passed
-  - ✅ Frontend 100% functional
+- Client bisa mengisi assessment dengan UX setara KN3 + backend endpoints existing. ✅
+- Comprehensive testing lulus. ✅
 
-### Phase 21C success criteria (FINAL)
-- Manual trigger AI report tersedia (UI + API). ✅
-- Report format terstruktur (JSON), per-domain analysis + overall summary. ✅
-- PDF export dapat menyertakan AI insights dengan `include_ai=true`. ✅
-- E2E flow verified via UI (generate report + tampilkan hasil). ✅
-
-### Hardening success criteria
-- Warning chart sizing non-kritis hilang / tereduksi signifikan. ✅
-- Frontend build clean dan stabil. ✅
+### Phase 22 (Deployment) success criteria
+- Deployment di VPS Ubuntu 24.04 LTS berhasil dari kondisi kosong sampai aplikasi jalan.
+- Backend `pip install -r requirements.txt` sukses tanpa package private.
+- Frontend `npm ci`/`npm install` + `npm run build` sukses tanpa manual trial.
+- Bisa jalan tanpa domain (akses via IP) menggunakan MongoDB local.
+- (Opsional) Bisa enable HTTPS saat domain tersedia.
 
 ---
 
 ## Appendix — Files (Updated)
 
-### Phase 21B (Assessment V2) — Files added/updated
-- ✅ (NEW) `frontend/src/utils/assessmentBranching.js`
-- ✅ (NEW) `frontend/src/features/portal/client/AssessmentTaking.jsx`
-- ✅ (NEW) `frontend/src/features/portal/client/components/QuestionField.jsx`
-- ✅ (NEW) `frontend/src/features/portal/client/components/HelpButton.jsx`
-- ✅ (NEW) `frontend/src/features/portal/client/components/AttachmentUploader.jsx`
-- ✅ (NEW) `frontend/src/features/portal/client/components/DomainNavigator.jsx`
-- ✅ (NEW) `frontend/src/features/portal/client/components/AssessmentProgress.jsx`
-- ✅ (UPDATE) `frontend/src/App.js` (route + lazy import)
+### Deployment & Ops docs
+- ✅ `/app/DEPLOYMENT_HOSTINGER.md`
+- ✅ `/app/QUICK_DEPLOY.md`
+- ✅ `/app/DEPLOYMENT_COMMANDS.md`
+- ✅ `/app/DEPLOYMENT_UBUNTU_24.04.md`
+- ✅ `/app/BRANDING_UPDATE.md`
 
-### Backend Fix (from comprehensive testing)
-- ✅ (UPDATE) `backend/routers/assessment.py` (fix `storage.save(raw, ext)` di 3 lokasi)
-- ✅ (NEW) `/app/backend_test_phase21b.py` (comprehensive backend test suite)
+### Branding changes
+- ✅ `frontend/public/index.html` (title Kubus + remove emergent scripts + manifest)
+- ✅ `frontend/public/favicon.svg` + variants
+- ✅ `frontend/public/manifest.json`
 
-### Issue P2 — Files added/updated
-- ✅ (NEW) `frontend/src/features/admin/pages/components/ConfirmDialog.jsx`
-- ✅ (UPDATE) `frontend/src/features/admin/pages/AdminProjects.jsx`
+### Dependencies
+- ⚠️ `backend/requirements.txt` still contains `emergentintegrations==0.1.2` (must be removed for VPS).
+- ⚠️ `frontend/package.json` contains `@zxing/*` versions that can conflict; AJV stack needs pinning.
 
-### Phase 21C — AI Reporting — Files added/updated
-- ✅ (NEW) `backend/ai_report_service.py`
-- ✅ (UPDATE) `backend/routers/assessment.py`
-  - Add: `POST /sessions/{id}/generate-report`
-  - Enhance: PDF export `include_ai=true`
-  - Remove: cached report GET endpoint (generate on demand)
-- ✅ (UPDATE) `backend/assessment_pdf.py` (professional AI section)
-- ✅ (NEW) `frontend/src/features/portal/client/components/AIReportDialog.jsx`
-- ✅ (UPDATE) `frontend/src/features/portal/client/ClientAssessments.jsx` (AI Report button + dialog)
-
-### Hardening
-- ✅ (UPDATE) `frontend/src/features/admin/pages/AdminAnalytics.jsx` (minHeight wrapper untuk chart container)
-
-### Test reports & artifacts
-- Baseline: `/app/test_reports/iteration_8.json` — 46/46 passed
-- Comprehensive Phase 21B: `/app/test_reports/iteration_11.json` — Backend 29/29 passed + Frontend verified
-- Screenshots (Phase 21B):
-  - `/app/.screenshots/assessment-list.png`
-  - `/app/.screenshots/assessment-taking.png`
-  - `/app/.screenshots/questions-filled.png`
-  - `/app/.screenshots/submit-dialog.png`
-- Screenshots (Phase 21C AI E2E): tersimpan pada output automation (generate AI dialog, loading, results)
+### Comparison reports
+- `/app/memory/ASSESSMENT_COMPARISON_REPORT.md`
+- `/app/memory/TEMPLATE_EDITOR_COMPARISON.md`
