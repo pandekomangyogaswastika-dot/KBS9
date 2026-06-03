@@ -560,7 +560,7 @@ export default function AdminAssessments() {
                 <p className="mt-0.5 text-xs text-[color:var(--kti-text-dim)]">{tpl.domain_count || tpl.section_count || 0} domain · {tpl.question_count || 0} pertanyaan</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => setBuilderTemplate(tpl)} title="Edit" disabled={tpl.published} className="grid size-8 place-items-center rounded-lg border border-white/10 text-white/60 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"><Pencil className="size-3.5" /></button>
+                <button onClick={() => setBuilderTemplate(tpl)} title="Edit" className="grid size-8 place-items-center rounded-lg border border-white/10 text-white/60 hover:bg-white/[0.06]"><Pencil className="size-3.5" /></button>
                 <button onClick={() => togglePublish(tpl)} title={tpl.published ? "Unpublish" : "Publish"} className={`grid size-8 place-items-center rounded-lg border text-sm ${ tpl.published ? "border-[rgba(255,150,100,0.4)] text-[#ffb07a] hover:bg-[rgba(255,150,100,0.08)]" : "border-[rgba(115,209,173,0.4)] text-[#73D1AD] hover:bg-[rgba(115,209,173,0.08)]" }`}>
                   {tpl.published ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                 </button>
