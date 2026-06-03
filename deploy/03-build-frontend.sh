@@ -30,8 +30,8 @@ echo "[*] REACT_APP_BACKEND_URL = ${PROTO}://${DOMAIN}"
 } > .env.production
 
 corepack enable 2>/dev/null || true
-echo "[*] yarn install (pakai lockfile)..."
-yarn install --frozen-lockfile || yarn install
+echo "[*] yarn install (--ignore-engines untuk hindari konflik engine @zxing)..."
+yarn install --frozen-lockfile --ignore-engines || yarn install --ignore-engines
 
 echo "[*] yarn build (butuh 1-3 menit)..."
 CI=false yarn build
