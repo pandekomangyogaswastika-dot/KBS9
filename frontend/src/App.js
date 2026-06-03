@@ -58,6 +58,7 @@ const AdminSeoDashboard = lazy(() => import("@/features/admin/pages/AdminSeoDash
 const AdminIntegrations = lazy(() => import("@/features/admin/pages/AdminIntegrations"));
 const AdminEmailOutbox = lazy(() => import("@/features/admin/pages/AdminEmailOutbox"));
 const AdminDemoSessions = lazy(() => import("@/features/admin/pages/AdminDemoSessions"));
+const CmsHubPage = lazy(() => import("@/features/admin/pages/CmsHubPage"));
 const DemoConfigPage = lazy(() => import("@/features/admin/DemoConfigPage"));
 const DemoAnalyticsPage = lazy(() => import("@/features/admin/DemoAnalyticsPage"));
 
@@ -153,6 +154,7 @@ function App() {
                 <Route path="demo-config" element={<DemoConfigPage />} />
                 <Route path="demo-analytics" element={<DemoAnalyticsPage />} />
                 <Route path="media" element={<MediaLibrary />} />
+                <Route path="cms" element={<CmsHubPage />} />
                 <Route path="cms/:resource" element={<CmsResourcePage />} />
                 <Route path="settings" element={<CmsSettings />} />
                 <Route path="assessments" element={<AdminAssessments />} />

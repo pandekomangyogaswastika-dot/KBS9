@@ -1,34 +1,26 @@
 [
   {
-    "content": "Buat seed template KN3 ERP Discovery (14 domain, ~85 pertanyaan) di KBS",
-    "status": "completed"
+    "content": "Redesign AdminLayout.jsx - sidebar baru dengan CMS collapsible",
+    "status": "in_progress"
   },
   {
-    "content": "Buat ProgressRing component (dark theme KTI)",
-    "status": "completed"
+    "content": "Redesign ClientLayout.jsx - section labels bahasa Indonesia",
+    "status": "pending"
   },
   {
-    "content": "Tambah Dashboard view ke AssessmentTaking (domain cards + overview)",
-    "status": "completed"
+    "content": "Redesign LoginPage.jsx - tambah role context tabs",
+    "status": "pending"
   },
   {
-    "content": "Tambah Summary/Review view sebelum submit",
-    "status": "completed"
+    "content": "Buat CMS Hub page baru (/portal/admin/cms)",
+    "status": "pending"
   },
   {
-    "content": "Tambah Export PDF button di client taking view",
-    "status": "completed"
+    "content": "Update App.js - tambah route CMS Hub",
+    "status": "pending"
   },
   {
-    "content": "Update AssessmentTaking dengan 3 views (dashboard/domain/summary)",
-    "status": "completed"
-  },
-  {
-    "content": "Fix admin template list: KN3 domains count display",
-    "status": "completed"
-  },
-  {
-    "content": "Test semua fitur dengan testing_agent",
-    "status": "completed"
+    "content": "Test semua perubahan IA dengan testing_agent",
+    "status": "pending"
   }
 ]
