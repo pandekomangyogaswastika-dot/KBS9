@@ -1,26 +1,26 @@
 [
   {
     "content": "Redesign AdminLayout.jsx - sidebar baru dengan CMS collapsible",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Redesign ClientLayout.jsx - section labels bahasa Indonesia",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Redesign LoginPage.jsx - tambah role context tabs",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Buat CMS Hub page baru (/portal/admin/cms)",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Update App.js - tambah route CMS Hub",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Test semua perubahan IA dengan testing_agent",
-    "status": "pending"
+    "status": "completed"
   }
 ]
