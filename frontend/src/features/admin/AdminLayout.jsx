@@ -11,7 +11,7 @@ import {
   BookOpen, Scale, Quote, HelpCircle, Package, Handshake, Newspaper,
   GalleryHorizontalEnd, Image as ImageIcon, BadgeCheck, Wrench,
   UserCog, Plug, Send, Settings, ChevronRight, Inbox, MonitorPlay,
-  BotMessageSquare, Mailbox,
+  BotMessageSquare, Mailbox, DatabaseBackup,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -128,6 +128,9 @@ function buildSections(role) {
         ] : []),
         { to: "/portal/admin/settings/email-outbox", icon: Mailbox, label: "Email Outbox", testid: "admin-nav-email-outbox" },
         { to: "/portal/admin/settings", icon: Settings, label: "Settings", testid: ADMIN.navSettings },
+        ...(isAdmin ? [
+          { to: "/portal/admin/recovery", icon: DatabaseBackup, label: "System Recovery", testid: "admin-nav-recovery" },
+        ] : []),
       ].filter(Boolean),
     },
   ].filter((s) => {

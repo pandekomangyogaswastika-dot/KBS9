@@ -86,6 +86,19 @@ HOME_BLOCKS = [
             "Tell us your challenge. Our team is ready to respond.")),
 ]
 
+async def seed_home_blocks_db(db) -> int:
+    """Idempotent: seed home blocks. Returns count of inserted blocks."""
+    inserted = 0
+    for block in HOME_BLOCKS:
+        existing = await db.cms_home_blocks.find_one({"key": block["key"], "voided": {"$ne": True}})
+        if not existing:
+            await db.cms_home_blocks.insert_one(block)
+            inserted += 1
+    if inserted:
+        print(f"[startup] seeded {inserted} home blocks")
+    return inserted
+
+
 async def run() -> None:
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]

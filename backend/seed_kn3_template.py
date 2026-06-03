@@ -1126,19 +1126,35 @@ KN3_TEMPLATE = {
 }
 
 
+async def seed_kn3_template(db) -> int:
+    """Idempotent: seed KN3 ERP & RFID Discovery template. Returns 1 if inserted/updated, 0 if skipped."""
+    from datetime import datetime, timezone
+    col = db.assessment_templates
+    tpl = dict(KN3_TEMPLATE)
+    now = datetime.now(timezone.utc).isoformat()
+    tpl["updated_at"] = now
+    tpl["published"] = True
+    # Ensure voided fields present
+    if "voided" not in tpl:
+        tpl["voided"] = False
+    if "created_by" not in tpl:
+        tpl["created_by"] = None
+
+    existing = await col.find_one({"id": tpl["id"]})
+    if existing:
+        await col.replace_one({"id": tpl["id"]}, tpl)
+        print(f"[startup] KN3 template updated ({sum(len(d['questions']) for d in tpl['domains'])} questions)")
+        return 0
+    tpl["created_at"] = now
+    await col.insert_one(tpl)
+    print(f"[startup] KN3 template inserted ({sum(len(d['questions']) for d in tpl['domains'])} questions)")
+    return 1
+
+
 async def seed():
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
-    col = db.assessment_templates
-
-    existing = await col.find_one({"id": KN3_TEMPLATE["id"]})
-    if existing:
-        await col.replace_one({"id": KN3_TEMPLATE["id"]}, KN3_TEMPLATE)
-        print(f"✅ Template '{KN3_TEMPLATE['id']}' updated (14 domains, {sum(len(d['questions']) for d in KN3_TEMPLATE['domains'])} questions)")
-    else:
-        await col.insert_one(KN3_TEMPLATE)
-        print(f"✅ Template '{KN3_TEMPLATE['id']}' inserted (14 domains, {sum(len(d['questions']) for d in KN3_TEMPLATE['domains'])} questions)")
-
+    await seed_kn3_template(db)
     client.close()
 
 

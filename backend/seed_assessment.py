@@ -9,6 +9,6 @@ async def seed_assessment(db):
         return 0
     tpl = build_it_discovery_template()
     now = now_iso()
-    tpl.update({"created_at": now, "updated_at": now, "created_by": None, "voided": False, "voided_at": None})
+    tpl.update({"created_at": now, "updated_at": now, "created_by": None, "voided": False, "voided_at": None, "published": True})
     await db.assessment_templates.insert_one(tpl)
     return 1

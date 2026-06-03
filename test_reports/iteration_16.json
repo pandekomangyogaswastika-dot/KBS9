@@ -1,0 +1,94 @@
+{
+  "summary": "Full backend + frontend testing of iteration 16 features: Assessment Templates, System Recovery, Excel Import, CMS Cases demo_slug dropdown, Home Sections, Assign Assessment to Client. Fixed route ordering bug for Excel endpoints. All 19 backend tests pass, all 8 feature areas verified via Playwright.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "CMS Cases Edit Form - Demo App Slug",
+        "issues": ["Uses native browser <select> element styled with dark theme class. Works correctly but not the shadcn Select component used elsewhere. Minor consistency issue."]
+      },
+      {
+        "screen": "Assign Assessment Dialog - Due Date",
+        "issues": ["Date field shows browser-default 'mm/dd/yyyy' placeholder — uses native <input type='date'> rather than shadcn calendar. Minor inconsistency."]
+      }
+    ]
+  },
+  "bugs_found_and_fixed": [
+    {
+      "file": "/app/backend/routers/assessment.py",
+      "issue": "Route GET /templates/excel-template was defined AFTER GET /templates/{template_id}, causing FastAPI to match 'excel-template' as a template_id and return 404 'Template tidak ditemukan'",
+      "fix": "Moved GET /templates/excel-template route to appear BEFORE GET /templates/{template_id} in route declarations. Also removed duplicate excel-template route definition.",
+      "status": "FIXED"
+    }
+  ],
+  "feature_test_results": {
+    "assessment_templates": {
+      "status": "PASS",
+      "details": "5 templates all Published: ERP & RFID (82 questions, 14 domains), Kebutuhan SI (5q), Digital Readiness (6q), IT Maturity (7q), IT Solution Discovery (28q, 8 domains)"
+    },
+    "system_recovery_page": {
+      "status": "PASS",
+      "details": "16 collections shown, counter 16/16 dipilih, Export button with 16 collections, Dedup button present and functional"
+    },
+    "system_recovery_dedup": {
+      "status": "PASS",
+      "details": "Clicking 'Jalankan Dedup' ran successfully, toast 'Dedup selesai: 0 dokumen duplikat dihapus' shown"
+    },
+    "system_recovery_export": {
+      "status": "PASS",
+      "details": "Export ZIP and JSON both return 200 with correct content-type headers"
+    },
+    "import_excel_button": {
+      "status": "PASS",
+      "details": "Import Excel button visible in Templates tab, dialog opens with form fields (Nama ID, Nama EN, Deskripsi, Pilih File, download template link)"
+    },
+    "excel_template_download": {
+      "status": "PASS (after fix)",
+      "details": "GET /api/assessment/templates/excel-template returns xlsx file after route ordering fix"
+    },
+    "demo_app_slug_dropdown": {
+      "status": "PASS",
+      "details": "CMS Cases edit form shows native <select> with 3 options: '— Pilih Demo —', 'KN3 — WMS & Inventory', 'Garment Serial Tracking'"
+    },
+    "home_sections_cms": {
+      "status": "PASS",
+      "details": "9 sections visible in /portal/admin/cms/home-blocks, all 'Terbit' (published)"
+    },
+    "assign_assessment_templates": {
+      "status": "PASS",
+      "details": "All 5 templates visible in assign dialog dropdown: ERP & RFID, Kebutuhan SI, Digital Readiness, IT Maturity, IT Solution Discovery"
+    }
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_features_iteration16.py",
+    "/app/test_reports/pytest/pytest_results_iter16.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Route ordering in FastAPI: always define static routes (e.g. /templates/excel-template) BEFORE parameterized routes (e.g. /templates/{template_id}). This is a critical FastAPI pattern — parameterized routes capture any path segment unless more specific routes come first.",
+    "Excel import endpoint at /api/assessment/templates/import-excel is also after /{template_id} — verify POST import-excel is working (POST routes don't conflict with GET /{template_id} since different HTTP method, but worth documenting)."
+  ],
+  "updated_files": [
+    "/app/backend/routers/assessment.py"
+  ],
+  "success_rate": {
+    "backend": "100% (19/19 tests pass)",
+    "frontend": "100% (all 8 features working)"
+  },
+  "test_credentials": "admin@kubus.id / Admin#2026",
+  "seed_data_creation": "No new seed data created. Seeded data (KN3 template, home blocks) confirmed present from startup.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 8 features from iteration 16 are working. Key fix: assessment router Excel route ordering bug was fixed (excel-template route moved before {template_id}). Backend 100%, Frontend 100%. Backend test file: /app/backend/tests/test_features_iteration16.py with 19 tests covering templates, system recovery (16 collections), excel import/export, CMS home-blocks, CMS cases demo_slug.",
+  "rca_of_issue": {
+    "bug": "GET /api/assessment/templates/excel-template returning 404 'Template tidak ditemukan'",
+    "root_cause": "FastAPI routes are matched in declaration order. The route @router.get('/templates/{template_id}') was declared at line ~103, BEFORE @router.get('/templates/excel-template') at line ~217. When a request for /templates/excel-template arrived, FastAPI matched it to the {template_id} pattern first, treating 'excel-template' as a template ID. Since no template had ID 'excel-template', it returned 404.",
+    "fix": "Moved the static /templates/excel-template route declaration to appear BEFORE the parameterized /templates/{template_id} route in assessment.py",
+    "prevention": "Always declare static/literal routes before parameterized routes in FastAPI routers"
+  }
+}

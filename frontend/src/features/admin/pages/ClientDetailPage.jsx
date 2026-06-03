@@ -67,7 +67,7 @@ export default function ClientDetailPage() {
   const loadTemplates = useCallback(async () => {
     try {
       const res = await api.get("/assessment/templates");
-      setTemplates((res.data?.data || []).filter((t) => t.published));
+      setTemplates(res.data?.data || []);
     } catch { /* ignore */ }
   }, []);
 

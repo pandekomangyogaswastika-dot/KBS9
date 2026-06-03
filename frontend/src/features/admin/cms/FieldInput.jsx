@@ -217,6 +217,7 @@ function ObjectList({ value, onChange, itemFields, lang }) {
 export default function FieldInput({ field, value, onChange }) {
   const { i18n } = useTranslation();
   const type = field.type;
+  const lang = i18n.language?.startsWith("en") ? "en" : "id";
 
   if (type === "bilingual")         return <Bilingual value={value} onChange={onChange} />;
   if (type === "bilingual-area")    return <Bilingual value={value} onChange={onChange} area />;
@@ -229,5 +230,20 @@ export default function FieldInput({ field, value, onChange }) {
   if (type === "blocks")  return <BlockBuilderField value={value} onChange={onChange} label={field.label} />;
   if (type === "bilingual-list")  return <BilingualList value={value} onChange={onChange} />;
   if (type === "object-list")     return <ObjectList value={value} onChange={onChange} itemFields={field.itemFields} lang={i18n.language} />;
+  if (type === "select" && field.options) {
+    const opts = field.options;
+    return (
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${inputCls} cursor-pointer`}
+      >
+        {opts.map((opt) => {
+          const label = typeof opt.label === "object" ? (opt.label[lang] || opt.label.id || opt.label.en) : (opt.label || opt.value);
+          return <option key={opt.value} value={opt.value}>{label}</option>;
+        })}
+      </select>
+    );
+  }
   return <input value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={inputCls} />;
 }

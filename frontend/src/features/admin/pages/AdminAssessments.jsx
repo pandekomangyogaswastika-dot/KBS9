@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   Plus, Copy, ExternalLink, FileText, Check, Trash2, Loader2,
   Inbox, Send, Sparkles, ChevronDown, ChevronRight, BookTemplate,
   Eye, EyeOff, Pencil, X, Users, Calendar, ArrowRight, ClipboardList,
-  LayoutList,
+  LayoutList, Upload, Download, FileSpreadsheet,
 } from "lucide-react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -221,6 +221,13 @@ export default function AdminAssessments() {
   });
   const [busy, setBusy] = useState(false);
 
+  // Excel import state
+  const [importOpen, setImportOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importForm, setImportForm] = useState({ name_id: "", name_en: "", description: "", category: "general" });
+  const [importBusy, setImportBusy] = useState(false);
+  const fileInputRef = useRef(null);
+
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
@@ -298,6 +305,48 @@ export default function AdminAssessments() {
     catch (err) { toast.error(apiError(err)); }
   };
 
+  const downloadExcelTemplate = async () => {
+    try {
+      const BACKEND = process.env.REACT_APP_BACKEND_URL || "";
+      const token = localStorage.getItem("kti_token") || sessionStorage.getItem("kti_token") || "";
+      const resp = await fetch(`${BACKEND}/api/assessment/templates/excel-template`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("Gagal mengunduh template");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "assessment_template.xlsx"; a.click(); URL.revokeObjectURL(url);
+    } catch (err) { toast.error("Gagal mengunduh: " + err.message); }
+  };
+
+  const handleImportExcel = async () => {
+    if (!importFile) { toast.error("Pilih file Excel terlebih dahulu"); return; }
+    if (!importForm.name_id.trim()) { toast.error("Nama template wajib diisi"); return; }
+    setImportBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", importFile);
+      fd.append("name_id", importForm.name_id.trim());
+      fd.append("name_en", importForm.name_en.trim());
+      fd.append("description", importForm.description.trim());
+      fd.append("category", importForm.category);
+      const BACKEND = process.env.REACT_APP_BACKEND_URL || "";
+      const token = localStorage.getItem("kti_token") || sessionStorage.getItem("kti_token") || "";
+      const resp = await fetch(`${BACKEND}/api/assessment/templates/import-excel`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error?.message || "Import gagal");
+      toast.success(`Template berhasil diimport: ${data.data?.sections_count || 0} domain, ${data.data?.questions_count || 0} pertanyaan`);
+      setImportOpen(false); setImportFile(null);
+      setImportForm({ name_id: "", name_en: "", description: "", category: "general" });
+      loadTemplates();
+    } catch (err) { toast.error("Import gagal: " + err.message); }
+    finally { setImportBusy(false); }
+  };
+
   const statCards = [
     { label: t("assess.totalSessions"), value: stats?.total_sessions ?? 0, icon: Inbox },
     { label: t("assess.submittedCount"), value: stats?.submitted_sessions ?? 0, icon: Send },
@@ -311,9 +360,17 @@ export default function AdminAssessments() {
         <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">{t("assess.title")}</h1>
         <div className="flex items-center gap-2">
           {activeTab === "templates" && (
-            <button onClick={() => setBuilderTemplate(null)} className="kti-focus inline-flex items-center gap-2 rounded-full border border-[rgba(115,209,173,0.45)] bg-[rgba(115,209,173,0.15)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[rgba(115,209,173,0.25)]" data-testid="btn-new-template">
-              <Plus className="size-4" /> Buat Template
-            </button>
+            <>
+              <button onClick={downloadExcelTemplate} title="Download Template Excel" className="kti-focus inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.05] hover:text-white">
+                <Download className="size-4" /> Template Excel
+              </button>
+              <button onClick={() => setImportOpen(true)} className="kti-focus inline-flex items-center gap-2 rounded-full border border-[rgba(245,190,100,0.45)] bg-[rgba(245,190,100,0.12)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[rgba(245,190,100,0.22)]" data-testid="btn-import-excel">
+                <FileSpreadsheet className="size-4" /> Import Excel
+              </button>
+              <button onClick={() => setBuilderTemplate(null)} className="kti-focus inline-flex items-center gap-2 rounded-full border border-[rgba(115,209,173,0.45)] bg-[rgba(115,209,173,0.15)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[rgba(115,209,173,0.25)]" data-testid="btn-new-template">
+                <Plus className="size-4" /> Buat Template
+              </button>
+            </>
           )}
           {activeTab === "sessions" && (
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -522,6 +579,56 @@ export default function AdminAssessments() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Excel Import Dialog */}
+      {importOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setImportOpen(false)} />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: "#0B0D17" }}>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">Import Template dari Excel</h2>
+              <button onClick={() => setImportOpen(false)} className="rounded-lg p-1.5 text-white/40 hover:bg-white/[0.05]"><X className="size-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-white/50">Nama Template (ID) *</label>
+                <input value={importForm.name_id} onChange={(e) => setImportForm({ ...importForm, name_id: e.target.value })}
+                  className={fieldCls} placeholder="Nama template (Bahasa Indonesia)" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-white/50">Nama Template (EN)</label>
+                <input value={importForm.name_en} onChange={(e) => setImportForm({ ...importForm, name_en: e.target.value })}
+                  className={fieldCls} placeholder="Template name (English)" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-white/50">Deskripsi (opsional)</label>
+                <input value={importForm.description} onChange={(e) => setImportForm({ ...importForm, description: e.target.value })}
+                  className={fieldCls} placeholder="Deskripsi singkat template" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-white/50">File Excel (.xlsx) *</label>
+                <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => setImportFile(e.target.files?.[0] || null)} />
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.05]">
+                    <Upload className="size-4" /> Pilih File
+                  </button>
+                  {importFile && <span className="truncate text-sm text-[#73D1AD]">{importFile.name}</span>}
+                </div>
+                <p className="mt-1.5 text-[11px] text-white/30">Format kolom: section_name_id, question_text_id, type, required, options_id, ... — <button type="button" onClick={downloadExcelTemplate} className="text-[#7C68E1] hover:underline">download template</button></p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setImportOpen(false)} className="rounded-full border border-white/12 px-5 py-2.5 text-sm text-white/70 hover:bg-white/[0.04]">Batal</button>
+              <button onClick={handleImportExcel} disabled={importBusy || !importFile || !importForm.name_id.trim()}
+                className="inline-flex items-center gap-2 rounded-full border border-[rgba(245,190,100,0.45)] bg-[rgba(245,190,100,0.15)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[rgba(245,190,100,0.25)] disabled:opacity-60">
+                {importBusy && <Loader2 className="size-4 animate-spin" />}
+                <FileSpreadsheet className="size-4" /> Import
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

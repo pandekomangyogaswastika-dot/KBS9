@@ -134,7 +134,9 @@ function OptionsEditor({ options = [], onChange }) {
 function ShowIfBuilder({ showIf, onChange, allQuestions, currentQId }) {
   const others = allQuestions.filter((q) => q.id !== currentQId);
   const target = showIf?.question_id ? others.find((q) => q.id === showIf.question_id) : null;
-  const targetType = target?.type || "";
+  // Normalize KN3 type aliases to editor types
+  const TYPE_NORM = { single_choice: "select", multi_choice: "multiselect", yes_no: "yesno", scale_1_5: "scale", text_short: "text", text_long: "textarea" };
+  const targetType = TYPE_NORM[target?.type] || target?.type || "";
   const targetOptions = target?.options || [];
   const needsValue = !["is_truthy", "is_falsy"].includes(showIf?.operator);
   const isMultiOp = ["in", "not_in"].includes(showIf?.operator);
@@ -427,7 +429,12 @@ function QuestionRow({ q, index, active, onClick, onMoveUp, onMoveDown, onDelete
 export default function TemplateEditorV2({ template, onClose, onSaved }) {
   // Template meta
   const [name, setName] = useState(() => ({ id: loc(template?.name, "id") || "", en: loc(template?.name, "en") || "" }));
-  const [category, setCategory] = useState(() => template?.description || "");
+  const [category, setCategory] = useState(() => {
+    const desc = template?.description;
+    if (!desc) return "";
+    if (typeof desc === "string") return desc;
+    return desc.id || desc.en || "";
+  });
   const [published, setPublished] = useState(() => template?.published ?? false);
 
   // Domains = sections

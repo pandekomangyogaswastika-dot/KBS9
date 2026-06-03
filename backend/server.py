@@ -25,6 +25,8 @@ from seed_assessment import seed_assessment  # noqa: E402
 from seed_data import seed_all  # noqa: E402
 from seed_users import seed_users  # noqa: E402
 from seed_pm import seed_pm  # noqa: E402
+from seed_home_blocks import seed_home_blocks_db  # noqa: E402
+from seed_kn3_template import seed_kn3_template  # noqa: E402
 from routers import projects as projects_router  # noqa: E402
 from routers import billing as billing_router  # noqa: E402
 from routers import chat as chat_router  # noqa: E402
@@ -46,6 +48,7 @@ from routers import resources as resources_router  # noqa: E402
 from routers import consultation as consultation_router  # noqa: E402
 from routers import demo_analytics as demo_analytics_router  # noqa: E402
 from routers import garment_demo as garment_demo_router  # noqa: E402
+from routers import system_recovery as system_recovery_router  # noqa: E402
 from demo_context import set_kn3_demo_db, reset_kn3_demo_db  # noqa: E402
 from db import get_client as mongo_client  # noqa: E402
 import re as _re  # noqa: E402
@@ -275,6 +278,9 @@ app.include_router(demo_analytics_router.admin_router)
 
 # Garment Serial Tracking demo (stateless, hardcoded fixtures)
 app.include_router(garment_demo_router.router)
+
+# System Recovery (export/import/dedup)
+app.include_router(system_recovery_router.router)
 
 # --- Demo KN3 Routers -------------------------------------------------------
 app.include_router(kn3_auth_router.router)
@@ -506,6 +512,29 @@ async def on_startup():
     await seed_users(db)
     await seed_assessment(db)
     await seed_pm(db)
+    # Seed KN3 ERP & RFID Discovery template (idempotent)
+    try:
+        await seed_kn3_template(db)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[startup] seed_kn3_template failed: {exc}")
+    # Seed home blocks (idempotent)
+    try:
+        await seed_home_blocks_db(db)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[startup] seed_home_blocks failed: {exc}")
+    # Ensure seeded assessment templates are published (migration)
+    try:
+        from core_utils import now_iso as _now_iso
+        await db.assessment_templates.update_many(
+            {"code": "it-solution-discovery", "published": {"$ne": True}},
+            {"$set": {"published": True, "updated_at": _now_iso()}}
+        )
+        await db.assessment_templates.update_many(
+            {"id": "kn3-erp-discovery-v1", "published": {"$ne": True}},
+            {"$set": {"published": True, "updated_at": _now_iso()}}
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[startup] template publish migration failed: {exc}")
     # Seed default email templates (idempotent)
     try:
         created = await seed_email_templates(db)

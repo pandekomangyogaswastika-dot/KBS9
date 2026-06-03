@@ -15,6 +15,7 @@ from core_utils import new_id, now_iso, serialize_doc, serialize_list, success_r
 from db import get_db
 from security import require_role
 from storage import get_storage
+from assessment_excel import generate_excel_template, parse_excel_template
 
 router = APIRouter(prefix="/api/assessment")
 
@@ -97,6 +98,17 @@ async def list_templates(_user=Depends(require_role("admin", "staff"))):
         row["published"] = bool(d.get("published") or d.get("is_published"))
         out.append(row)
     return success_response(out)
+
+
+@router.get("/templates/excel-template")
+async def download_excel_template_route(_user=Depends(require_role("admin", "staff"))):
+    """Download blank Excel template for assessment import. (Must be before /{template_id})"""
+    xlsx_bytes = generate_excel_template()
+    return StreamingResponse(
+        io.BytesIO(xlsx_bytes),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=assessment_template.xlsx"},
+    )
 
 
 @router.get("/templates/{template_id}")
@@ -209,6 +221,51 @@ async def delete_template(template_id: str, _user=Depends(require_role("admin"))
         raise HTTPException(status_code=409, detail={"code": "HAS_SESSIONS", "message": f"Template ini digunakan oleh {active} sesi aktif, tidak bisa dihapus."})
     await db.assessment_templates.update_one({"id": template_id}, {"$set": {"voided": True, "updated_at": now_iso()}})
     return success_response({"id": template_id, "deleted": True})
+
+
+# ─── EXCEL IMPORT / EXPORT ───────────────────────────────────────────────────
+
+@router.post("/templates/import-excel", status_code=201)
+async def import_template_from_excel(
+    file: UploadFile = File(...),
+    name_id: str = Form(...),
+    name_en: str = Form(default=""),
+    description: str = Form(default=""),
+    category: str = Form(default="general"),
+    user=Depends(require_role("admin", "staff")),
+):
+    """Import assessment template from Excel file."""
+    ext = (_ext(file.filename or "")).lower()
+    if ext not in (".xlsx", ".xls"):
+        raise HTTPException(status_code=415, detail={"code": "BAD_FORMAT", "message": "File harus berformat .xlsx atau .xls"})
+    raw = await file.read()
+    if len(raw) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail={"code": "TOO_LARGE", "message": "File melebihi 10 MB"})
+    try:
+        sections = parse_excel_template(raw)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail={"code": "PARSE_ERROR", "message": f"Gagal membaca Excel: {str(e)}"})
+    if not sections:
+        raise HTTPException(status_code=422, detail={"code": "EMPTY", "message": "File Excel kosong atau tidak ada pertanyaan yang valid"})
+    total_q = sum(len(s.get("questions", [])) for s in sections)
+    now = now_iso()
+    doc = {
+        "id": new_id(), "created_at": now, "updated_at": now, "created_by": user["id"],
+        "voided": False, "published": False,
+        "name": {"id": name_id.strip(), "en": name_en.strip() or name_id.strip()},
+        "description": {"id": description.strip(), "en": description.strip()} if description.strip() else None,
+        "category": category,
+        "sections": sections,
+        "locale_default": "id",
+        "imported_from": "excel",
+    }
+    db = get_db()
+    await db.assessment_templates.insert_one(doc)
+    return success_response({
+        **serialize_doc(doc),
+        "sections_count": len(sections),
+        "questions_count": total_q,
+    })
 
 
 # ─── SESSION MANAGEMENT ─────────────────────────────────────────────────────
