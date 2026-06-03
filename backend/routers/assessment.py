@@ -771,6 +771,20 @@ async def generate_report(session_id: str, locale: str = "id", _user=Depends(req
         raise HTTPException(status_code=500, detail={"code": "AI_ERROR", "message": f"Gagal generate report: {str(e)}"})
 
 
+@router.delete("/{token}/attachments/{attachment_id}")
+async def delete_attachment_public(token: str, attachment_id: str):
+    """Delete attachment via public token (for anonymous assessment takers)."""
+    db = get_db()
+    session = await _session_by_token(token)
+    if session.get("status") == "submitted":
+        raise HTTPException(status_code=409, detail={"code": "ALREADY_SUBMITTED", "message": "Sesi sudah disubmit"})
+    att = await db.assessment_attachments.find_one({"id": attachment_id, "session_id": session["id"]})
+    if not att:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "Lampiran tidak ditemukan"})
+    await db.assessment_attachments.delete_one({"id": attachment_id})
+    return success_response({"id": attachment_id, "deleted": True})
+
+
 @router.delete("/sessions/{session_id}/attachments/{attachment_id}")
 async def delete_attachment_by_session(session_id: str, attachment_id: str, user=Depends(require_role("admin", "staff", "client"))):
     """Delete attachment by session_id + attachment_id (auth-based)."""

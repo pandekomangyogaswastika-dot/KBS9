@@ -558,7 +558,7 @@ export default function TemplateEditorV2({ template, onClose, onSaved }) {
     try {
       const payload = {
         name: { id: name.id.trim(), en: name.en.trim() || name.id.trim() },
-        description: category.trim() || null,
+        description: category.trim() ? { id: category.trim(), en: category.trim() } : null,
         published,
         sections: domains.map((d) => ({
           id: d.id, title: d.title, description: d.description, color: d.color, icon: d.icon,
