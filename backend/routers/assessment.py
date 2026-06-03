@@ -201,11 +201,15 @@ async def toggle_publish(template_id: str, user=Depends(require_role("admin"))):
     doc = await db.assessment_templates.find_one({"id": template_id, "voided": {"$ne": True}})
     if not doc:
         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "Template tidak ditemukan"})
-    total_q = sum(len(s.get("questions", [])) for s in doc.get("sections", []))
-    if not doc.get("published") and total_q == 0:
+    # Support both 'sections' (standard) and 'domains' (KN3-style)
+    all_sections = doc.get("sections") or doc.get("domains") or []
+    total_q = sum(len(s.get("questions", [])) for s in all_sections)
+    currently_published = bool(doc.get("published") or doc.get("is_published"))
+    # Only validate question count when PUBLISHING (not when unpublishing)
+    if not currently_published and total_q == 0:
         raise HTTPException(status_code=422, detail={"code": "NO_QUESTIONS", "message": "Template harus memiliki minimal 1 pertanyaan sebelum dipublish"})
-    new_state = not doc.get("published", False)
-    await db.assessment_templates.update_one({"id": template_id}, {"$set": {"published": new_state, "updated_at": now_iso()}})
+    new_state = not currently_published
+    await db.assessment_templates.update_one({"id": template_id}, {"$set": {"published": new_state, "is_published": new_state, "updated_at": now_iso()}})
     return success_response({"id": template_id, "published": new_state})
 
 
