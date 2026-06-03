@@ -88,9 +88,12 @@ async def list_templates(_user=Depends(require_role("admin", "staff"))):
     for d in docs:
         row = serialize_doc(d)
         # count questions
-        total_q = sum(len(s.get("questions", [])) for s in d.get("sections", []))
+        # Support both 'sections' (legacy) and 'domains' (KN3-style)
+        sections = d.get("sections") or d.get("domains") or []
+        total_q = sum(len(s.get("questions", [])) for s in sections)
         row["question_count"] = total_q
-        row["section_count"] = len(d.get("sections", []))
+        row["section_count"] = len(sections)
+        row["domain_count"] = len(sections)
         out.append(row)
     return success_response(out)
 

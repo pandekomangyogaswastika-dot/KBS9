@@ -24,7 +24,11 @@
     "status": "completed"
   },
   {
+    "content": "Fix admin template list: KN3 domains count display",
+    "status": "completed"
+  },
+  {
     "content": "Test semua fitur dengan testing_agent",
-    "status": "in_progress"
+    "status": "completed"
   }
 ]

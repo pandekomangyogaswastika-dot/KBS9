@@ -500,7 +500,7 @@ export default function AdminAssessments() {
                   </span>
                   <span className="rounded-full bg-white/[0.04] border border-white/10 px-2 py-0.5 text-[10px] text-white/50">{tpl.category}</span>
                 </div>
-                <p className="mt-0.5 text-xs text-[color:var(--kti-text-dim)]">{tpl.section_count} seksi · {tpl.question_count} pertanyaan</p>
+                <p className="mt-0.5 text-xs text-[color:var(--kti-text-dim)]">{tpl.domain_count || tpl.section_count || 0} domain · {tpl.question_count || 0} pertanyaan</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => setBuilderTemplate(tpl)} title="Edit" disabled={tpl.published} className="grid size-8 place-items-center rounded-lg border border-white/10 text-white/60 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"><Pencil className="size-3.5" /></button>
