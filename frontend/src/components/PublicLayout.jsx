@@ -29,7 +29,7 @@ export default function PublicLayout() {
         )}
         <Preloader />
         <CustomCursor />
-        <FloatingPillNavbar />
+        <FloatingPillNavbar logoUrl={settings?.logo_url} />
         <main className="relative" style={{ zIndex: 2 }}>
           <Outlet context={{ settings }} />
         </main>

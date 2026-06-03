@@ -1,10 +1,12 @@
 // Dekoratif: logo, hex mark, planet orb (cases), crew avatar, logo chip, star layer.
 
+// Fallback logo — used only when CMS has no logo_url configured
 export const KTI_LOGO = "https://customer-assets.emergentagent.com/job_a52d8ee5-565f-40b5-b6b4-e2621e38267c/artifacts/3b1m0zyx_logo%20kubus%20nobg.png";
 
-export function KubusMark({ className = "", height = 38 }) {
+export function KubusMark({ className = "", height = 38, logoUrl }) {
+  const src = logoUrl || KTI_LOGO;
   return (
-    <img src={KTI_LOGO} alt="Kubus Teknologi Indonesia" height={height} style={{ height }} className={`w-auto select-none ${className}`} draggable={false} />
+    <img src={src} alt="Kubus Teknologi Indonesia" height={height} style={{ height }} className={`w-auto select-none ${className}`} draggable={false} />
   );
 }
 

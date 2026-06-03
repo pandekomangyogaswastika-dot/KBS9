@@ -47,7 +47,7 @@ const Dot = ({ active }) =>
     />
   ) : null;
 
-export const FloatingPillNavbar = () => {
+export const FloatingPillNavbar = ({ logoUrl }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -127,7 +127,7 @@ export const FloatingPillNavbar = () => {
             aria-label="Kubus home"
             className="kti-focus flex shrink-0 items-center rounded-full px-2 py-1"
           >
-            <KubusMark height={showFull ? 30 : 24} />
+            <KubusMark height={showFull ? 30 : 24} logoUrl={logoUrl} />
           </Link>
 
           {/* Desktop nav links */}

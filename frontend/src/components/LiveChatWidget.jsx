@@ -97,8 +97,8 @@ export function LiveChatWidget() {
             onClick={() => setIsOpen(true)}
             data-testid="live-chat-button"
             className="fixed bottom-6 right-6 flex items-center justify-center w-14 h-14 rounded-full shadow-[0_8px_30px_rgba(124,104,225,0.4)] transition-all"
-            style={{ zIndex: 9998 }}
             style={{
+              zIndex: 99999,
               background: 'linear-gradient(135deg, #7C68E1 0%, #73D1AD 100%)',
             }}
           >
@@ -126,7 +126,7 @@ export function LiveChatWidget() {
               background: 'rgba(11,13,23,0.98)',
               border: '1px solid rgba(124,104,225,0.3)',
               backdropFilter: 'blur(20px)',
-              zIndex: 9998,
+              zIndex: 99999,
             }}
             data-testid="live-chat-window"
           >

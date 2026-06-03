@@ -260,10 +260,10 @@ SETTINGS = {
         {"label": _b("Tim Ahli", "Expert Team"), "value": "60+"},
     ],
     "contact": {
-        "email": "halo@kubusteknologi.id",
-        "phone": "+62 21 5000 1234",
-        "address": _b("Jakarta, Indonesia", "Jakarta, Indonesia"),
-        "social": {"linkedin": "#", "instagram": "#", "twitter": "#", "github": "#"},
+        "email": "hello@kubusindonesia.com",
+        "phone": "+62899 3939 617",
+        "address": _b("GoWork Space Lv. 3 Jl. Gatot Subroto No. 271, Bandung", "GoWork Space Lv. 3 Jl. Gatot Subroto No. 271, Bandung City"),
+        "social": {"linkedin": "", "instagram": "", "twitter": "", "github": ""},
     },
 }
 

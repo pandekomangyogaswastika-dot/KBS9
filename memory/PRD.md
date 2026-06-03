@@ -52,7 +52,18 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 
 ---
 
-## Changelog - Phase 17 (Juni 2026)
+## Changelog - Phase 18 (Juni 2026)
+
+### Bug Fixes UI
+- **LiveChatWidget z-index**: Fix duplicate `style` props (zIndex tertimpa background). Sekarang `zIndex: 99999` — selalu paling depan
+- **HorizontalCasesRail**: Tambah `min-h-screen flex items-center py-8` saat `pinned` — cards sekarang ter-center secara vertikal di viewport, tidak lagi menempel di atas dengan empty space besar di bawah
+- **Logo tidak hardcode**: `KubusMark` sekarang menerima prop `logoUrl` — PublicLayout pass `settings.logo_url` ke Navbar dan Footer. Fallback ke KTI_LOGO jika CMS kosong
+- **Footer contact info**: Update via CMS API + seed default + startup migration:
+  - Email: hello@kubusindonesia.com
+  - Phone: +62899 3939 617  
+  - Alamat: GoWork Space Lv. 3 Jl. Gatot Subroto No. 271, Bandung
+
+---
 
 ### Bug Fixes
 - **CMS Double Data**: System Recovery page + Dedup endpoint (hapus duplikat per collection berdasarkan slug/name/key)

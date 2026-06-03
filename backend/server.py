@@ -535,6 +535,25 @@ async def on_startup():
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[startup] template publish migration failed: {exc}")
+    # Migrate site settings contact info
+    try:
+        site = await db.cms_pages.find_one({"key": "site"})
+        if site:
+            old_contact = site.get("contact", {})
+            if old_contact.get("email") in (None, "", "halo@kubusteknologi.id"):
+                await db.cms_pages.update_one(
+                    {"key": "site"},
+                    {"$set": {
+                        "contact.email": "hello@kubusindonesia.com",
+                        "contact.phone": "+62899 3939 617",
+                        "contact.address": {
+                            "id": "GoWork Space Lv. 3 Jl. Gatot Subroto No. 271, Bandung",
+                            "en": "GoWork Space Lv. 3 Jl. Gatot Subroto No. 271, Bandung City",
+                        },
+                    }}
+                )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[startup] contact migration failed: {exc}")
     # Seed default email templates (idempotent)
     try:
         created = await seed_email_templates(db)

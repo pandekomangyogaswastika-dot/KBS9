@@ -43,7 +43,7 @@ export const HorizontalCasesRail = ({ items = [] }) => {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden" data-testid="horizontal-cases-rail">
-      <div className={pinned ? "" : "overflow-x-auto kti-no-scrollbar"}>
+      <div className={pinned ? "min-h-screen flex items-center py-8" : "overflow-x-auto kti-no-scrollbar"}>
         <div
           ref={trackRef}
           className={`flex gap-5 px-4 sm:px-6 lg:px-8 ${pinned ? "" : "snap-x snap-mandatory"}`}

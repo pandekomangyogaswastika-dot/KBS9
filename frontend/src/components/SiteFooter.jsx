@@ -22,7 +22,7 @@ export default function SiteFooter({ settings }) {
       <div className="kti-container relative py-14">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
           <div className="md:col-span-1">
-            <KubusMark height={40} />
+            <KubusMark height={40} logoUrl={settings?.logo_url} />
             <p className="mt-4 kti-text-dim text-sm max-w-xs">{L(settings?.tagline) || t("footer.tagline")}</p>
           </div>
 
