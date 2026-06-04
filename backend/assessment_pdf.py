@@ -134,6 +134,83 @@ def _render_answer(q, ans, locale):
     return str(val) if val not in (None, "") else none_txt
 
 
+def _build_options_display(q, ans, qtype, locale, style_sel, style_none, style_skip):
+    """Show ALL answer options with selected one marked '>>' — mimics web form display."""
+    opts = q.get("options") or []
+    val = (ans or {}).get("value")
+    is_skipped = bool(ans and ans.get("skipped"))
+
+    if is_skipped:
+        return Paragraph("(Dilewati)" if locale == "id" else "(Skipped)", style_skip)
+
+    # Synthetic options for yes_no
+    if qtype == "yes_no" and not opts:
+        opts = [
+            {"value": "ya",    "label": {"id": "Ya",    "en": "Yes"}},
+            {"value": "tidak", "label": {"id": "Tidak", "en": "No"}},
+        ]
+
+    # Resolve selected values
+    selected_set: set = set()
+    if val is not None and val != "":
+        if qtype == "yes_no":
+            if val in (True, "yes", "true", "Ya", "ya", 1, "1"):
+                selected_set = {"ya"}
+            elif val in (False, "no", "false", "Tidak", "tidak", 0, "0"):
+                selected_set = {"tidak"}
+        elif qtype == "multi_choice":
+            selected_set = {str(v) for v in (val if isinstance(val, list) else [val])}
+        else:
+            selected_set = {str(val)}
+
+    if not opts:
+        ans_text = _render_answer(q, ans, locale)
+        return Paragraph(
+            _esc(ans_text) if ans_text and ans_text != "—" else
+            ("Belum dijawab" if locale == "id" else "Not answered"),
+            style_none,
+        )
+
+    parts = []
+    for opt in opts:
+        opt_val = str(opt.get("value", ""))
+        opt_label = _loc(opt.get("label", {}), locale) or opt_val
+        is_sel = (opt_val in selected_set or
+                  opt_val.lower() in {v.lower() for v in selected_set})
+        if is_sel:
+            parts.append(Paragraph(f">> {_esc(opt_label)}", style_sel))
+        else:
+            parts.append(Paragraph(_esc(opt_label), style_none))
+
+    return parts if parts else Paragraph(
+        "Belum dijawab" if locale == "id" else "Not answered", style_none
+    )
+
+
+def _build_scale_display(q, ans, locale, style_sel, style_none):
+    """Show scale 1–5 with selected bracket marker and maturity label."""
+    val = (ans or {}).get("value")
+    if (ans or {}).get("skipped"):
+        return Paragraph("(Dilewati)" if locale == "id" else "(Skipped)", style_none)
+    try:
+        selected = int(float(val)) if val is not None and val != "" else None
+    except (TypeError, ValueError):
+        selected = None
+
+    if selected is None:
+        return Paragraph("Belum dijawab" if locale == "id" else "Not answered", style_none)
+
+    # Build: " 1    2   [3]   4    5 "
+    parts_text = []
+    for i in range(1, 6):
+        parts_text.append(f"[{i}]" if i == selected else f" {i} ")
+    scale_line = "  ".join(parts_text)
+    maturity = _maturity_label(float(selected), locale)
+    sub_line = f"{selected}/5 — {maturity}" if maturity != "—" else f"{selected}/5"
+
+    return [Paragraph(scale_line, style_sel), Paragraph(sub_line, style_none)]
+
+
 def _domain_progress(domain, answers_map):
     qs = domain.get("questions") or []
     visible = [q for q in qs if evaluate_show_if(q.get("show_if"), answers_map)]
@@ -457,6 +534,9 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
     cell_ok   = ParagraphStyle("cok",   fontName="Helvetica-Bold", fontSize=9, textColor=accent,  alignment=TA_CENTER, leading=12)
     cell_skip_s = ParagraphStyle("cskip", fontName="Helvetica",     fontSize=9, textColor=C_FAINT, alignment=TA_CENTER, leading=12)
     cell_empty_s= ParagraphStyle("cempty",fontName="Helvetica",     fontSize=9, textColor=C_FAINT, alignment=TA_CENTER, leading=12)
+    # Option display styles (for choice + scale questions)
+    opt_sel  = ParagraphStyle("opsel",  fontName="Helvetica-Bold", fontSize=9,   textColor=accent, leading=12, leftIndent=0)
+    opt_none = ParagraphStyle("opnone", fontName="Helvetica",       fontSize=8.5, textColor=C_FAINT, leading=11,  leftIndent=10)
 
     # Domain header row
     score_str = ""
@@ -500,14 +580,20 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
         has_answer = bool(ans and not ans.get("skipped") and ans.get("value") not in (None, ""))
         is_skipped = bool(ans and ans.get("skipped"))
 
-        # Answer cell
-        ans_text = _render_answer(q, ans, locale)
-        if has_answer:
-            ans_cell = Paragraph(_esc(ans_text), cell_ans)
-        elif is_skipped:
-            ans_cell = Paragraph(_esc(ans_text), cell_ans_skip)
+        # Answer cell — show all options for choice/scale (mimics web form)
+        qtype_n = _normalize_type(q.get("type", ""))
+        if qtype_n in ("single_choice", "multi_choice", "yes_no"):
+            ans_cell = _build_options_display(q, ans, qtype_n, locale, opt_sel, opt_none, cell_ans_skip)
+        elif qtype_n == "scale_1_5":
+            ans_cell = _build_scale_display(q, ans, locale, opt_sel, opt_none)
         else:
-            ans_cell = Paragraph("Belum dijawab" if locale == "id" else "Not answered", cell_ans_none)
+            ans_text = _render_answer(q, ans, locale)
+            if has_answer:
+                ans_cell = Paragraph(_esc(ans_text), cell_ans)
+            elif is_skipped:
+                ans_cell = Paragraph(_esc(ans_text), cell_ans_skip)
+            else:
+                ans_cell = Paragraph("Belum dijawab" if locale == "id" else "Not answered", cell_ans_none)
 
         # Question cell (may include note + attachments as sub-items)
         q_content_parts = [Paragraph(_esc(_get_prompt(q, locale) or "—"), cell_q)]
