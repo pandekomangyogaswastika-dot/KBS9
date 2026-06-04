@@ -68,6 +68,24 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 
 ---
 
+## Changelog - Phase 20 v2 (Juni 2026)
+
+### Enhancement — PDF Tampilkan Opsi Jawaban + Excel Format Profesional
+- **PDF Options Display**: `assessment_pdf.py` sekarang menampilkan SEMUA opsi jawaban per pertanyaan:
+  - `single_choice` / `multi_choice` / `yes_no`: semua opsi ditampilkan, opsi terpilih ditandai `>>`
+  - `scale_1_5`: skala 1–5 visual `[ 1 ]  [ 2 ]  [3]  [ 4 ]  [ 5 ]` + label maturitas
+  - Fungsi baru: `_build_options_display()`, `_build_scale_display()`
+  - Text/number: tampilan teks biasa (tidak berubah)
+- **Excel _Opts Sheet** (`assessment_excel_answers.py` v2):
+  - Sheet tersembunyi `_Opts` menyimpan label PENUH setiap pertanyaan
+  - Dropdown di kolom G sekarang referensi `_Opts!$A$1:$A$n` — bypass limit 255 karakter
+  - Label tidak lagi disingkat, muncul penuh di dropdown picker
+  - Kolom Panduan (F): opsi ditampilkan per baris bernomor (numbered list, tidak satu baris)
+  - Pre-filled jawaban: tampilkan label (bukan kode internal)
+  - Format korporat lebih formal: warna netral, border eksplisit, print area
+  - Panduan sheet: semua teks eksplisit gelap (`ROW_FG = "1A1C25"`)
+- **Test iteration_20**: Backend 11/12 pass (1 expected 409 on submitted), Frontend 100%
+
 ## Changelog - Phase 20 (Juni 2026)
 
 ### New Features — PDF Profesional & CMS PDF Config
