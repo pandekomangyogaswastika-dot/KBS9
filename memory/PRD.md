@@ -52,6 +52,28 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 
 ---
 
+## Changelog - Phase 20 (Juni 2026)
+
+### New Features — PDF Profesional & CMS PDF Config
+- **PDF Redesign (Bold Corporate)**: Total redesign `assessment_pdf.py` menggunakan `BaseDocTemplate`:
+  - Cover page penuh (dark background #0D0F1C, logo, judul, info klien, progress bar)
+  - Tabel ringkasan semua domain (completion %, skor, maturitas)
+  - Per-domain sections dengan header bar berwarna + tabel Q&A berborder
+  - Skor & maturitas per domain (rata-rata skala 1–5 → Awal/Berkembang/Terdefinisi/Terkelola/Optimal)
+  - Footer halaman dengan nomor halaman, nama perusahaan, teks rahasia
+  - Conditional sections (sembunyikan domain kosong bila dikonfigurasi)
+- **CMS Admin PDF Settings** (`/portal/admin/pdf-settings`):
+  - Konfigurasi branding: company name, tagline, logo URL, brand color, accent color
+  - Toggle layout: show_cover, show_summary, show_empty_domains, show_notes, show_scoring, show_attachments
+  - Custom footer text
+  - **Live Preview** via iframe embed (generate PDF langsung di browser)
+  - Session picker untuk memilih sesi preview
+  - Simpan ke `cms_settings` collection (key: `pdf_config`)
+- **Backend**: New router `routers/assessment_pdf_config.py` (`GET/PUT /api/admin/pdf-config`, `GET /api/admin/pdf-config/preview`)
+- **Nav**: Sidebar admin ada menu "PDF Settings" di section CRM
+
+---
+
 ## Changelog - Phase 19 (Juni 2026)
 
 ### Bug Fixes
