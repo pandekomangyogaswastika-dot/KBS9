@@ -52,6 +52,22 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 
 ---
 
+## Changelog - Phase 19 (Juni 2026)
+
+### Bug Fixes
+- **P0 Demo Flow "Sesi Tidak Valid"**: DemoConfigPage ExternalLink button sekarang mengarah ke `/cases/{slug}` (bukan `/demo/kn3` langsung tanpa session). Root cause: tombol membuka demo tanpa session ID.
+- **DemoConfigPage API**: Endpoint difix dari `/admin/cases` → `/admin/cms/cases`.
+- **AssessmentV2Taking routing**: App.js sekarang mengarah ke `AssessmentV2Taking` (bukan `AssessmentTaking` lama) untuk route `/portal/assessments/:sessionId`.
+
+### New Features
+- **Assessment PDF Export sebelum Submit**: `GET /api/assessment/sessions/{id}/export-pdf` tidak lagi memerlukan status "submitted" — bisa diunduh kapan saja (draft/in-progress).
+- **Assessment Excel Export Jawaban**: `GET /api/assessment/sessions/{id}/export-answers-excel` — export semua pertanyaan + jawaban saat ini sebagai Excel yang bisa diisi offline.
+- **Assessment Excel Import Jawaban**: `POST /api/assessment/sessions/{id}/import-answers-excel` — upload Excel yang sudah diisi → auto-fill semua jawaban ke sesi.
+- **UI Tombol baru di AssessmentV2Taking**: Tombol PDF, Download Excel, Import Excel selalu terlihat di top bar. Import hanya aktif sebelum submit.
+- **Module baru**: `backend/assessment_excel_answers.py` — logika generate/parse Excel untuk jawaban assessment.
+
+---
+
 ## Changelog - Phase 18 (Juni 2026)
 
 ### Bug Fixes UI

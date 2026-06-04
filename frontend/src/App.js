@@ -75,7 +75,7 @@ const ClientAssistant = lazy(() => import("@/features/portal/client/ClientAssist
 const ClientAssessments = lazy(() => import("@/features/portal/client/ClientAssessments"));
 const ClientDetailPage = lazy(() => import("@/features/admin/pages/ClientDetailPage"));
 const AssessmentClient = lazy(() => import("@/features/assessment/AssessmentClient"));
-const AssessmentTaking = lazy(() => import("@/features/portal/client/AssessmentTaking"));
+const AssessmentTaking = lazy(() => import("@/features/assessment/AssessmentV2Taking"));
 const DemoPage = lazy(() => import("@/features/demo/DemoPage"));
 const GarmentSerialDemoApp = lazy(() => import("@/demos/garment-serial/GarmentSerialDemoApp"));
 
