@@ -19,7 +19,7 @@ export default function DemoConfigPage() {
   const loadCases = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/admin/cases');
+      const response = await api.get('/admin/cms/cases');
       setCases(response.data);
     } catch (err) {
       setError(apiError(err));
@@ -199,11 +199,11 @@ function DemoConfigCard({ caseItem, onToggle, onUpdate, isSaving }) {
             <div className="flex items-center gap-2">
               {caseItem.demo_enabled && caseItem.demo_slug && (
                 <a
-                  href={`/demo/${caseItem.demo_slug}`}
+                  href={`/cases/${caseItem.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg transition-colors hover:bg-white/10"
-                  title="Open Demo"
+                  title="Pratinjau demo via halaman kasus (butuh isi gate form)"
                 >
                   <ExternalLink className="w-4 h-4" style={{ color: 'rgba(232,234,242,0.7)' }} />
                 </a>

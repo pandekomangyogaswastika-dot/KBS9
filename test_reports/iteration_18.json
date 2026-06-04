@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 18 testing for 3 features: Demo P0 fix, PDF export before submit, Excel export/import. All backend API tests PASS (7/7). Two frontend issues found and one fixed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "AssessmentV2Taking.jsx",
+        "issue": "AssessmentV2Taking.jsx (with new PDF/Excel/Import buttons) is NOT registered in App.js routing. The route /portal/assessments/:sessionId uses the OLD AssessmentTaking.jsx which only has PDF (with old token-based export endpoint). Excel and Import buttons are unreachable by users.",
+        "selector": "N/A - not in route",
+        "priority": "HIGH"
+      },
+      {
+        "component": "AssessmentTaking.jsx (client portal)",
+        "issue": "handleExportPdf uses old endpoint `/api/assessment/${session.token}/export` instead of new `/api/assessment/sessions/${sessionId}/export-pdf`. Will fail for draft sessions if the token-based route still requires submitted status.",
+        "selector": "[data-testid='header-export-pdf']",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_features_iteration18.py",
+    "/app/test_reports/pytest/pytest_results_iter18.xml"
+  ],
+  "action_items": [
+    "Wire AssessmentV2Taking.jsx to App.js: either replace `import AssessmentTaking` with `AssessmentV2Taking` for the route `/portal/assessments/:sessionId`, OR add a separate route for staff/admin. This is critical — without this, the new Excel export/import and improved PDF buttons are completely invisible to users.",
+    "Update handleExportPdf in AssessmentTaking.jsx to use the new `/api/assessment/sessions/${sessionId}/export-pdf` endpoint (auth-based, works for draft and submitted) instead of the old token-based export."
+  ],
+  "critical_code_review_comments": [
+    "AssessmentV2Taking.jsx exists at /app/frontend/src/features/assessment/AssessmentV2Taking.jsx but is NEVER imported or used in App.js — dead code that needs to be wired up",
+    "DemoConfigPage.jsx was calling /admin/cases (404) instead of /admin/cms/cases — FIXED in this iteration"
+  ],
+  "updated_files": [
+    "/app/frontend/src/features/admin/DemoConfigPage.jsx (fixed API endpoint /admin/cases → /admin/cms/cases)",
+    "/app/backend/tests/test_features_iteration18.py"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7 tests pass)",
+    "frontend": "50% (DemoConfigPage API fix done; AssessmentV2Taking not wired to route)"
+  },
+  "seed_data_creation": "",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend APIs for PDF export (before/after submit), Excel export, Excel import all work correctly. DemoConfigPage API fixed. Main outstanding issue: AssessmentV2Taking.jsx is not connected to any route - main agent needs to update App.js. Session IDs: draft=fe7b000b-5915-4064-9e10-3f4adb922ceb, submitted=912ff0c5-41d4-458d-b4dc-d7cefd35561f. Admin: admin@kubus.id / Admin#2026.",
+  "rca_of_issue": "AssessmentV2Taking.jsx was created as a replacement/upgrade for AssessmentTaking.jsx but was never connected in App.js. The lazy import and Route entry for /portal/assessments/:sessionId still points to the old AssessmentTaking. Fix: in App.js, change line 78 from `import('@/features/portal/client/AssessmentTaking')` to `import('@/features/assessment/AssessmentV2Taking')` OR update AssessmentTaking.jsx to include the new Excel/Import buttons."
+}

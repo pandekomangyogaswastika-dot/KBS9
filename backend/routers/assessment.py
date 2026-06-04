@@ -16,6 +16,7 @@ from db import get_db
 from security import require_role
 from storage import get_storage
 from assessment_excel import generate_excel_template, parse_excel_template
+from assessment_excel_answers import generate_answers_excel, parse_answers_excel
 
 router = APIRouter(prefix="/api/assessment")
 
@@ -550,10 +551,8 @@ async def submit_session(token: str):
 
 @router.get("/{token}/export")
 async def export_pdf(token: str, locale: str = "id", include_ai: bool = False):
-    """Export PDF with optional AI insights (generated on-the-fly if include_ai=true)."""
+    """Export PDF — dapat diunduh kapan saja (sebelum maupun sesudah submit)."""
     session = await _session_by_token(token)
-    if session.get("status") != "submitted":
-        raise HTTPException(status_code=409, detail={"code": "NOT_SUBMITTED", "message": "Sesi belum disubmit"})
     db = get_db()
     template = await _template_for(session)
     answers_list = serialize_list(await db.assessment_answers.find({"session_id": session["id"]}).to_list(1000))
@@ -736,6 +735,94 @@ async def submit_session_auth(session_id: str, user=Depends(require_role("admin"
         except Exception:
             pass
     return success_response({"id": session["id"], "status": "submitted"})
+
+
+# ─── SESSION-BASED EXPORT ENDPOINTS ──────────────────────────────────────────
+
+@router.get("/sessions/{session_id}/export-pdf")
+async def export_pdf_by_session(session_id: str, locale: str = "id", user=Depends(require_role("admin", "staff", "client"))):
+    """Export PDF via session_id (auth-based). Bisa diunduh sebelum maupun sesudah submit."""
+    db = get_db()
+    session = await _session_by_id_for_user(session_id, user)
+    template = await _template_for(session)
+    answers_list = serialize_list(await db.assessment_answers.find({"session_id": session["id"]}).to_list(1000))
+    answers_map = answers_list_to_map(answers_list)
+    progress = compute_progress(template, answers_list)
+    att_list = serialize_list(await db.assessment_attachments.find({"session_id": session["id"]}).to_list(200))
+    attachments_by_question: dict = {}
+    for att in att_list:
+        attachments_by_question.setdefault(att["question_id"], []).append(att)
+    pdf_bytes = build_pdf(session, template, answers_map, progress, attachments_by_question=attachments_by_question, locale=locale)
+    buf = io.BytesIO(pdf_bytes)
+    filename = f"assessment_{session_id[:8]}.pdf"
+    return StreamingResponse(buf, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
+@router.get("/sessions/{session_id}/export-answers-excel")
+async def export_answers_excel(session_id: str, locale: str = "id", user=Depends(require_role("admin", "staff", "client"))):
+    """Export semua pertanyaan + jawaban saat ini sebagai Excel yang bisa diisi offline."""
+    db = get_db()
+    session = await _session_by_id_for_user(session_id, user)
+    template = await _template_for(session)
+    answers_list = serialize_list(await db.assessment_answers.find({"session_id": session["id"]}).to_list(1000))
+    answers_map = answers_list_to_map(answers_list)
+    excel_bytes = generate_answers_excel(session, template, answers_map, locale=locale)
+    buf = io.BytesIO(excel_bytes)
+    filename = f"assessment_answers_{session_id[:8]}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.post("/sessions/{session_id}/import-answers-excel")
+async def import_answers_excel(
+    session_id: str,
+    file: UploadFile = File(...),
+    user=Depends(require_role("admin", "staff", "client")),
+):
+    """Import jawaban dari Excel → bulk-upsert ke sesi assessment."""
+    session = await _session_by_id_for_user(session_id, user)
+    if session.get("status") == "submitted":
+        raise HTTPException(status_code=409, detail={"code": "ALREADY_SUBMITTED", "message": "Sesi sudah disubmit, tidak bisa import jawaban"})
+    ext = _ext(file.filename or "")
+    if ext != ".xlsx":
+        raise HTTPException(status_code=415, detail={"code": "BAD_EXT", "message": "File harus berformat .xlsx"})
+    raw = await file.read()
+    if len(raw) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail={"code": "TOO_LARGE", "message": "File melebihi 10 MB"})
+    db = get_db()
+    template = await _template_for(session)
+    parsed = parse_answers_excel(raw, template)
+    if not parsed:
+        raise HTTPException(status_code=422, detail={"code": "NO_ANSWERS", "message": "Tidak ada jawaban ditemukan di file Excel"})
+    valid_ids = set(get_all_question_ids(template))
+    now = now_iso()
+    saved = 0
+    for ans in parsed:
+        if ans["question_id"] not in valid_ids:
+            continue
+        update_data = {
+            "session_id": session["id"],
+            "question_id": ans["question_id"],
+            "value": ans["value"],
+            "answered_at": now,
+            "skipped": ans.get("skipped", False),
+        }
+        if ans.get("other_text") is not None:
+            update_data["other_text"] = ans["other_text"]
+        if ans.get("note") is not None:
+            update_data["note"] = ans["note"]
+        await db.assessment_answers.update_one(
+            {"session_id": session["id"], "question_id": ans["question_id"]},
+            {"$set": update_data},
+            upsert=True,
+        )
+        saved += 1
+    await db.assessment_sessions.update_one({"id": session["id"]}, {"$set": {"updated_at": now}})
+    return success_response({"saved": saved, "total_in_file": len(parsed)})
 
 
 @router.post("/sessions/{session_id}/generate-report")

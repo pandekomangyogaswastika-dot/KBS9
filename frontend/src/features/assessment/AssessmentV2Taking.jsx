@@ -11,6 +11,7 @@ import {
   CheckCircle2, ChevronLeft, ChevronRight, Loader2, Send,
   FileText, StickyNote, X, Paperclip, Trash2, SkipForward,
   RotateCcw, AlertTriangle, Check, Eye, EyeOff,
+  Download, Upload, FileSpreadsheet,
 } from "lucide-react";
 import { api, apiError } from "@/lib/apiClient";
 import { LoadingView, ErrorView } from "@/components/StateViews";
@@ -376,6 +377,9 @@ export default function AssessmentV2Taking() {
   const [lastSaved, setLastSaved] = useState(null);
   const saveTimer = useRef(null);
   const pendingSave = useRef([]);
+  const importFileRef = useRef(null);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -453,6 +457,52 @@ export default function AssessmentV2Taking() {
     finally { setSubmitting(false); }
   };
 
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      const res = await api.get(`/assessment/sessions/${sessionId}/export-pdf?locale=${lang}`, { responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `assessment_${sessionId.slice(0, 8)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF berhasil diunduh");
+    } catch (err) { toast.error(apiError(err, "Gagal mengunduh PDF")); }
+    finally { setExporting(false); }
+  };
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const res = await api.get(`/assessment/sessions/${sessionId}/export-answers-excel?locale=${lang}`, { responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([res.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `assessment_jawaban_${sessionId.slice(0, 8)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Excel berhasil diunduh — isi kolom 'Jawaban Anda' lalu import kembali");
+    } catch (err) { toast.error(apiError(err, "Gagal mengunduh Excel")); }
+    finally { setExporting(false); }
+  };
+
+  const handleImportExcel = async (file) => {
+    if (!file) return;
+    setImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await api.post(`/assessment/sessions/${sessionId}/import-answers-excel`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const { saved, total_in_file } = res.data?.data || {};
+      toast.success(`${saved} jawaban berhasil diimport dari ${total_in_file} baris`);
+      await load();
+    } catch (err) { toast.error(apiError(err, "Gagal import Excel")); }
+    finally { setImporting(false); if (importFileRef.current) importFileRef.current.value = ""; }
+  };
+
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center" style={{ background: "#0B0D17" }}>
       <LoadingView />
@@ -501,6 +551,52 @@ export default function AssessmentV2Taking() {
               </div>
               <span className="text-xs font-bold text-white">{overallPct}%</span>
             </div>
+
+            {/* Export/Import Tools — selalu tersedia */}
+            <div className="flex items-center gap-1.5">
+              {/* PDF */}
+              <button
+                data-testid="btn-export-pdf"
+                onClick={handleExportPdf}
+                disabled={exporting}
+                title="Unduh PDF"
+                className="flex items-center gap-1.5 rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-xs text-white/70 hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+              >
+                {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <FileText className="size-3.5" />}
+                <span className="hidden sm:inline">PDF</span>
+              </button>
+
+              {/* Export Excel */}
+              <button
+                data-testid="btn-export-excel"
+                onClick={handleExportExcel}
+                disabled={exporting || locked}
+                title="Export jawaban ke Excel"
+                className="flex items-center gap-1.5 rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-xs text-white/70 hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+              >
+                {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
+                <span className="hidden sm:inline">Excel</span>
+              </button>
+
+              {/* Import Excel — hanya sebelum submit */}
+              {!locked && (
+                <>
+                  <button
+                    data-testid="btn-import-excel"
+                    onClick={() => importFileRef.current?.click()}
+                    disabled={importing}
+                    title="Import jawaban dari Excel"
+                    className="flex items-center gap-1.5 rounded-xl border border-[rgba(124,104,225,0.4)] bg-[rgba(124,104,225,0.1)] px-3 py-2 text-xs text-[#7C68E1] hover:bg-[rgba(124,104,225,0.2)] disabled:opacity-50"
+                  >
+                    {importing ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                    <span className="hidden sm:inline">Import</span>
+                  </button>
+                  <input ref={importFileRef} type="file" accept=".xlsx" className="hidden"
+                    onChange={(e) => handleImportExcel(e.target.files?.[0])} />
+                </>
+              )}
+            </div>
+
             {!locked && (
               <button onClick={() => setConfirmSubmit(true)}
                 disabled={submitting}
@@ -508,12 +604,6 @@ export default function AssessmentV2Taking() {
                 className="flex items-center gap-2 rounded-xl border border-[rgba(115,209,173,0.4)] bg-[rgba(115,209,173,0.12)] px-4 py-2 text-sm font-semibold text-white hover:bg-[rgba(115,209,173,0.2)]">
                 <Send className="size-3.5" /> Submit
               </button>
-            )}
-            {locked && (
-              <a href={`/api/assessment/${session.token}/export?locale=${lang}`} target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2 text-sm text-white hover:bg-white/[0.08]">
-                <FileText className="size-3.5" /> Unduh PDF
-              </a>
             )}
           </div>
         </div>
@@ -524,7 +614,7 @@ export default function AssessmentV2Taking() {
         <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
           <div className="flex items-center gap-3 rounded-xl border border-[rgba(115,209,173,0.3)] bg-[rgba(115,209,173,0.08)] px-5 py-3 text-sm text-[#73D1AD]">
             <CheckCircle2 className="size-4 shrink-0" />
-            <span>Assessment ini telah disubmit. Jawaban tidak bisa diubah lagi. Anda bisa mengunduh hasil PDF.</span>
+            <span>Assessment ini telah disubmit. Jawaban tidak bisa diubah lagi. Gunakan tombol <strong>PDF</strong> di atas untuk mengunduh hasil.</span>
           </div>
         </div>
       )}
