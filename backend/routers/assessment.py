@@ -553,43 +553,28 @@ async def submit_session(token: str):
 async def export_pdf(token: str, locale: str = "id", include_ai: bool = False):
     """Export PDF — dapat diunduh kapan saja (sebelum maupun sesudah submit)."""
     session = await _session_by_token(token)
-    db = get_db()
     template = await _template_for(session)
     answers_list = serialize_list(await db.assessment_answers.find({"session_id": session["id"]}).to_list(1000))
     answers_map = answers_list_to_map(answers_list)
     progress = compute_progress(template, answers_list)
-    # Build attachments_by_question
     att_list = serialize_list(await db.assessment_attachments.find({"session_id": session["id"]}).to_list(200))
-    attachments_by_question = {}
+    attachments_by_question: dict = {}
     for att in att_list:
         attachments_by_question.setdefault(att["question_id"], []).append(att)
-    
-    # AI report: generate on-the-fly if include_ai=true
     ai_report = None
     if include_ai:
-        try:
-            from ai_report_service import ai_report_generator
-            session_data = {
-                "template": serialize_doc(template),
-                "answers_map": answers_map,
-                "client_name": session.get("client_name", "Client"),
-                "project_name": session.get("project_name"),
-                "submitted_at": session.get("submitted_at"),
-            }
-            ai_report = await ai_report_generator.generate_report(session_data, locale=locale)
-        except Exception as e:
-            print(f"Error generating AI report for PDF: {str(e)}")
-            # Continue without AI report
-    
-    loc = session.get("locale", "id") if locale == "id" else locale
-    pdf_bytes = build_pdf(session, template, answers_map, progress, attachments_by_question=attachments_by_question, locale=loc, ai_report=ai_report)
-    buf = io.BytesIO(pdf_bytes)
-    filename_suffix = "_ai" if include_ai else ""
-    return StreamingResponse(
-        buf,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=assessment_{token[:8]}{filename_suffix}.pdf"},
-    )
+        ai_doc = await db.assessment_ai_reports.find_one({"session_id": session["id"]})
+        if ai_doc:
+            ai_report = serialize_doc(ai_doc).get("report")
+    # Load PDF config
+    pdf_cfg_doc = await db.cms_settings.find_one({"key": "pdf_config"})
+    pdf_config = serialize_doc(pdf_cfg_doc) if pdf_cfg_doc else None
+    pdf_bytes = build_pdf(session, template, answers_map, progress,
+                          attachments_by_question=attachments_by_question,
+                          locale=locale, ai_report=ai_report, pdf_config=pdf_config)
+    filename_suffix = f"_{session.get('client_name','').replace(' ','_')}" if session.get("client_name") else ""
+    return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename=assessment_{token[:8]}{filename_suffix}.pdf"})
 
 
 @router.post("/{token}/attachments")
@@ -752,7 +737,10 @@ async def export_pdf_by_session(session_id: str, locale: str = "id", user=Depend
     attachments_by_question: dict = {}
     for att in att_list:
         attachments_by_question.setdefault(att["question_id"], []).append(att)
-    pdf_bytes = build_pdf(session, template, answers_map, progress, attachments_by_question=attachments_by_question, locale=locale)
+    # Load PDF config from CMS
+    pdf_cfg_doc = await db.cms_settings.find_one({"key": "pdf_config"})
+    pdf_config = serialize_doc(pdf_cfg_doc) if pdf_cfg_doc else None
+    pdf_bytes = build_pdf(session, template, answers_map, progress, attachments_by_question=attachments_by_question, locale=locale, pdf_config=pdf_config)
     buf = io.BytesIO(pdf_bytes)
     filename = f"assessment_{session_id[:8]}.pdf"
     return StreamingResponse(buf, media_type="application/pdf",

@@ -11,7 +11,7 @@ import {
   BookOpen, Scale, Quote, HelpCircle, Package, Handshake, Newspaper,
   GalleryHorizontalEnd, Image as ImageIcon, BadgeCheck, Wrench,
   UserCog, Plug, Send, Settings, ChevronRight, Inbox, MonitorPlay,
-  BotMessageSquare, Mailbox, DatabaseBackup,
+  BotMessageSquare, Mailbox, DatabaseBackup, FileOutput,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -95,6 +95,7 @@ function buildSections(role) {
       items: [
         { to: "/portal/admin/leads", icon: UserPlus, label: "Leads", testid: ADMIN.navLeads },
         { to: "/portal/admin/assessments", icon: ClipboardList, label: "Assessments", testid: "admin-nav-assessments" },
+        { to: "/portal/admin/pdf-settings", icon: FileOutput, label: "PDF Settings", testid: "admin-nav-pdf-settings" },
         { to: "/portal/admin/clients", icon: Building2, label: "Clients", testid: "admin-nav-clients" },
       ],
     },

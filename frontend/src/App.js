@@ -62,6 +62,7 @@ const CmsHubPage = lazy(() => import("@/features/admin/pages/CmsHubPage"));
 const DemoConfigPage = lazy(() => import("@/features/admin/DemoConfigPage"));
 const DemoAnalyticsPage = lazy(() => import("@/features/admin/DemoAnalyticsPage"));
 const SystemRecoveryPage = lazy(() => import("@/features/admin/pages/SystemRecoveryPage"));
+const PDFSettingsPage = lazy(() => import("@/features/admin/pages/PDFSettingsPage"));
 
 // Client portal
 const ClientLayout = lazy(() => import("@/features/portal/client/ClientLayout"));
@@ -176,6 +177,7 @@ function App() {
                 />
                 <Route path="settings/email-outbox" element={<AdminEmailOutbox />} />
                 <Route path="recovery" element={<SystemRecoveryPage />} />
+                <Route path="pdf-settings" element={<PDFSettingsPage />} />
                 <Route
                   path="users"
                   element={(

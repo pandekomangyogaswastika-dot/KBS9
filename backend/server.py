@@ -47,6 +47,7 @@ from routers import resources as resources_router  # noqa: E402
 # New features
 from routers import consultation as consultation_router  # noqa: E402
 from routers import demo_analytics as demo_analytics_router  # noqa: E402
+from routers import assessment_pdf_config as assessment_pdf_config_router  # noqa: E402
 from routers import garment_demo as garment_demo_router  # noqa: E402
 from routers import system_recovery as system_recovery_router  # noqa: E402
 from demo_context import set_kn3_demo_db, reset_kn3_demo_db  # noqa: E402
@@ -274,6 +275,7 @@ app.include_router(resources_router.router)
 # New features
 app.include_router(consultation_router.router)
 app.include_router(demo_analytics_router.router)
+app.include_router(assessment_pdf_config_router.router)
 app.include_router(demo_analytics_router.admin_router)
 
 # Garment Serial Tracking demo (stateless, hardcoded fixtures)
