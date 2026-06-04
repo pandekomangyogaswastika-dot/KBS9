@@ -27,33 +27,48 @@ class DemoSessionEvent(BaseModel):
 
 @router.post("/request-access")
 async def request_demo_access(request: DemoAccessRequest):
-    """Log demo access request and track lead"""
+    """Log demo access request, create a real demo session, and return demo_url."""
+    from routers.demo import create_demo_session, DemoSessionRequest  # noqa: PLC0415
     db = get_db()
-    
-    # Create demo access log
-    access_log = {
-        "id": new_id(),
-        "case_slug": request.case_slug,
-        "demo_slug": request.demo_slug,
-        "user_name": request.user_name,
-        "user_email": request.user_email,
-        "user_company": request.user_company,
-        "user_phone": request.user_phone,
-        "session_id": new_id(),
-        "status": "initiated",
-        "created_at": now_iso(),
-        "expires_at": (datetime.utcnow() + timedelta(minutes=90)).isoformat(),
-    }
-    
-    await db.demo_access_logs.insert_one(access_log)
-    
-    # TODO: Send access credentials email
-    # TODO: Trigger marketing automation
-    
+
+    # Create proper demo session (handles per-email reuse, capacity, seed data)
+    try:
+        session_result = await create_demo_session(DemoSessionRequest(
+            name=request.user_name,
+            email=request.user_email,
+            company=request.user_company or "",
+            app_slug=request.demo_slug or "kn3",
+        ))
+        session_id = session_result.get("session_id") or session_result.get("token")
+        demo_url = session_result.get("demo_url") or f"/demo/{request.demo_slug}?session={session_id}"
+    except Exception as exc:
+        # Fallback: log access and return error-friendly message
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "SESSION_CREATE_FAILED", "message": f"Gagal membuat sesi demo: {exc}"},
+        )
+
+    # Also record access log for analytics (fire-and-forget)
+    try:
+        access_log = {
+            "id": new_id(),
+            "case_slug": request.case_slug,
+            "demo_slug": request.demo_slug,
+            "user_name": request.user_name,
+            "user_email": request.user_email,
+            "user_company": request.user_company,
+            "session_id": session_id,
+            "status": "initiated",
+            "created_at": now_iso(),
+        }
+        await db.demo_access_logs.insert_one(access_log)
+    except Exception:
+        pass  # analytics failure should not block the user
+
     return success_response({
-        "session_id": access_log["session_id"],
-        "expires_at": access_log["expires_at"],
-        "demo_url": f"/demo/{request.demo_slug}?session={access_log['session_id']}"
+        "session_id": session_id,
+        "expires_at": session_result.get("expires_at"),
+        "demo_url": demo_url,
     })
 
 
