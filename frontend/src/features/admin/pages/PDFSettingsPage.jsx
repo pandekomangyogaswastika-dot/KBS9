@@ -243,7 +243,7 @@ export default function PDFSettingsPage() {
             <div className="h-px bg-white/[0.05]" />
             <ToggleRow label="Tabel Ringkasan" hint="Tampilkan tabel semua domain dan persentase penyelesaian" checked={config.show_summary} onChange={setField("show_summary")} />
             <div className="h-px bg-white/[0.05]" />
-            <ToggleRow label="Domain Kosong" hint="Tampilkan domain yang belum ada jawaban sama sekali" checked={config.show_empty_domains} onChange={setField("show_empty_domains")} />
+            <ToggleRow label="Sembunyikan Domain Tanpa Pertanyaan" hint="Sembunyikan domain yang benar-benar kosong (tidak ada pertanyaan di dalamnya)" checked={!config.show_empty_domains} onChange={(v) => setField("show_empty_domains")(!v)} />
             <div className="h-px bg-white/[0.05]" />
             <ToggleRow label="Catatan Responden" hint="Tampilkan catatan tambahan per pertanyaan" checked={config.show_notes} onChange={setField("show_notes")} />
             <div className="h-px bg-white/[0.05]" />

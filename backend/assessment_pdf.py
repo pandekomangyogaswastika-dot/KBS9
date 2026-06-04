@@ -60,7 +60,7 @@ DEFAULT_CONFIG = {
     "brand_color":      "#5B49C9",
     "accent_color":     "#1D7874",
     "footer_text":      "Dokumen ini bersifat rahasia dan hanya untuk penerima yang dituju",
-    "show_empty_domains": False,
+    "show_empty_domains": True,
     "show_notes":       True,
     "show_scoring":     True,
     "show_cover":       True,
@@ -300,8 +300,6 @@ def _build_cover(story, session, template, progress, locale, brand, accent, logo
     prog_label = ParagraphStyle("pl", fontName="Helvetica-Bold", fontSize=10, textColor=C_WHITE, leading=14)
     prog_sub   = ParagraphStyle("ps", fontName="Helvetica", fontSize=8, textColor=C_FAINT, leading=11)
     # Progress bar as a table
-    fill_w = max(1, int((content_w - 40 * mm) * pct / 100))
-    bar_inner_w = int(content_w - 40 * mm)
     bar_row = [
         [Paragraph(f"{answered}/{total}", prog_label), ""],
     ]
@@ -370,7 +368,6 @@ def _build_summary(story, template, answers_map, progress, locale, brand, accent
         score_str = f"{score}" if score is not None else "—"
         maturity_str = _maturity_label(score, locale) if has_scale else "—"
 
-        row_bg = C_ROW_B if idx % 2 == 0 else C_ROW_A
         row_data = [
             Paragraph(str(idx), cell_norm),
             Paragraph(_esc(dom_title), cell_norm),
@@ -449,13 +446,17 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
                             leading=15, alignment=TA_LEFT)
     h_dom_meta = ParagraphStyle("hdm", fontName="Helvetica", fontSize=8, textColor=colors.HexColor("#C0C8F0"),
                                  leading=11, alignment=TA_RIGHT)
-    cell_q   = ParagraphStyle("cq", fontName="Helvetica", fontSize=9, textColor=C_INK, leading=12)
-    cell_q_hdr = ParagraphStyle("cqh", fontName="Helvetica-Bold", fontSize=9, textColor=C_WHITE, leading=12)
-    cell_ans = ParagraphStyle("ca", fontName="Helvetica", fontSize=9, textColor=colors.HexColor("#1D6060"), leading=12)
-    cell_ans_none = ParagraphStyle("can", fontName="Helvetica-Oblique", fontSize=8, textColor=C_FAINT, leading=11)
-    cell_ans_skip = ParagraphStyle("cas", fontName="Helvetica-Oblique", fontSize=8, textColor=colors.HexColor("#A08030"), leading=11)
-    cell_no = ParagraphStyle("cno", fontName="Helvetica-Bold", fontSize=9, textColor=C_MUTED, leading=12, alignment=TA_CENTER)
-    cell_note = ParagraphStyle("cnte", fontName="Helvetica-Oblique", fontSize=8, textColor=C_FAINT, leading=11)
+    cell_q       = ParagraphStyle("cq",   fontName="Helvetica",         fontSize=9, textColor=C_INK,                          leading=12)
+    cell_q_hdr   = ParagraphStyle("cqh",  fontName="Helvetica-Bold",    fontSize=9, textColor=C_WHITE,                        leading=12)
+    cell_ans     = ParagraphStyle("ca",   fontName="Helvetica",         fontSize=9, textColor=colors.HexColor("#1D6060"),      leading=12)
+    cell_ans_none= ParagraphStyle("can",  fontName="Helvetica-Oblique", fontSize=8, textColor=C_FAINT,                        leading=11)
+    cell_ans_skip= ParagraphStyle("cas",  fontName="Helvetica-Oblique", fontSize=8, textColor=colors.HexColor("#A08030"),     leading=11)
+    cell_no      = ParagraphStyle("cno",  fontName="Helvetica-Bold",    fontSize=9, textColor=C_MUTED, alignment=TA_CENTER,   leading=12)
+    cell_note    = ParagraphStyle("cnte", fontName="Helvetica-Oblique", fontSize=8, textColor=C_FAINT,                        leading=11)
+    # Pre-define status styles (avoid same-name re-creation each loop)
+    cell_ok   = ParagraphStyle("cok",   fontName="Helvetica-Bold", fontSize=9, textColor=accent,  alignment=TA_CENTER, leading=12)
+    cell_skip_s = ParagraphStyle("cskip", fontName="Helvetica",     fontSize=9, textColor=C_FAINT, alignment=TA_CENTER, leading=12)
+    cell_empty_s= ParagraphStyle("cempty",fontName="Helvetica",     fontSize=9, textColor=C_FAINT, alignment=TA_CENTER, leading=12)
 
     # Domain header row
     score_str = ""
@@ -486,7 +487,7 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
         Paragraph("#", cell_q_hdr),
         Paragraph("Pertanyaan" if locale == "id" else "Question", cell_q_hdr),
         Paragraph("Jawaban" if locale == "id" else "Answer", cell_q_hdr),
-        Paragraph("OK", cell_q_hdr),
+        Paragraph("", cell_q_hdr),
     ]
     qa_rows = [qa_hdrs]
 
@@ -499,7 +500,7 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
         has_answer = bool(ans and not ans.get("skipped") and ans.get("value") not in (None, ""))
         is_skipped = bool(ans and ans.get("skipped"))
 
-        # Answer text style
+        # Answer cell
         ans_text = _render_answer(q, ans, locale)
         if has_answer:
             ans_cell = Paragraph(_esc(ans_text), cell_ans)
@@ -508,48 +509,42 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
         else:
             ans_cell = Paragraph("Belum dijawab" if locale == "id" else "Not answered", cell_ans_none)
 
-        # Optional note
+        # Question cell (may include note + attachments as sub-items)
+        q_content_parts = [Paragraph(_esc(_get_prompt(q, locale) or "—"), cell_q)]
         note = (ans or {}).get("note") if show_notes else None
-        q_cells = []
-        q_cells.append(Paragraph(_esc(_get_prompt(q, locale)), cell_q))
         if note:
-            q_cells.append(Spacer(1, 2))
-            q_cells.append(Paragraph(f"{'Catatan' if locale == 'id' else 'Note'}: {_esc(note)}", cell_note))
-
-        # Optional attachments
+            q_content_parts.append(Paragraph(f"{'Catatan' if locale == 'id' else 'Note'}: {_esc(note)}", cell_note))
         if show_attachments:
             atts = (attachments_by_question or {}).get(qid, [])
             if atts:
                 names = ", ".join(a.get("filename") or a.get("original_name", "file") for a in atts)
-                q_cells.append(Paragraph(f"Lampiran: {_esc(names)}", cell_note))
+                q_content_parts.append(Paragraph(f"Lampiran: {_esc(names)}", cell_note))
+        q_cell = q_content_parts[0] if len(q_content_parts) == 1 else q_content_parts
 
-        from reportlab.platypus import ListFlowable
-        q_cell_content = q_cells[0] if len(q_cells) == 1 else q_cells
+        # Status cell — ASCII only, no Unicode
+        if has_answer:
+            status_cell = Paragraph("Ya", cell_ok)
+        elif is_skipped:
+            status_cell = Paragraph("-", cell_skip_s)
+        else:
+            status_cell = Paragraph("", cell_empty_s)
 
-        status_sym = "✓" if has_answer else ("→" if is_skipped else " ")
-        status_color = accent if has_answer else (C_FAINT if is_skipped else C_FAINT)
-        status_style = ParagraphStyle(
-            "ss", fontName="Helvetica-Bold", fontSize=11, textColor=status_color,
-            alignment=TA_CENTER, leading=14
-        )
-
-        row = [
-            Paragraph(str(q_idx), cell_no),
-            q_cell_content if len(q_cells) == 1 else "\n".join(str(x) for x in q_cells),
-            ans_cell,
-            Paragraph(status_sym, status_style),
-        ]
+        row = [Paragraph(str(q_idx), cell_no), q_cell, ans_cell, status_cell]
         qa_rows.append(row)
 
-    col_w = [10 * mm, 88 * mm, 70 * mm, 10 * mm]
+    col_w = [10 * mm, 90 * mm, 70 * mm, 8 * mm]
     qa_tbl = Table(qa_rows, colWidths=col_w, repeatRows=1)
 
     n = len(qa_rows)
     row_styles = []
     for r in range(1, n):
-        ans_r = (answers_map or {}).get((visible_qs[r - 1]).get("id", "") if r - 1 < len(visible_qs) else "")
+        if r - 1 < len(visible_qs):
+            qid_r = visible_qs[r - 1].get("id", "")
+            ans_r = (answers_map or {}).get(qid_r)
+        else:
+            ans_r = None
         has_a = bool(ans_r and not ans_r.get("skipped") and ans_r.get("value") not in (None, ""))
-        is_s = bool(ans_r and ans_r.get("skipped"))
+        is_s  = bool(ans_r and ans_r.get("skipped"))
         if is_s:
             row_styles.append(("BACKGROUND", (0, r), (-1, r), C_SKIPPED))
         elif not has_a:
@@ -559,15 +554,15 @@ def _build_domain_section(story, domain, visible_qs, answers_map, locale, brand,
 
     qa_tbl.setStyle(TableStyle([
         # Header
-        ("BACKGROUND",   (0, 0), (-1, 0), C_NAVY),
-        ("TEXTCOLOR",    (0, 0), (-1, 0), C_WHITE),
-        ("FONTNAME",     (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("BACKGROUND",    (0, 0), (-1, 0), C_NAVY),
+        ("TEXTCOLOR",     (0, 0), (-1, 0), C_WHITE),
+        ("FONTNAME",      (0, 0), (-1, 0), "Helvetica-Bold"),
         # Borders
-        ("GRID",         (0, 0), (-1, -1), 0.3, C_BORDER),
-        ("BOX",          (0, 0), (-1, -1), 0.6, C_BORDER),
-        ("LINEBELOW",    (0, 0), (-1, 0), 1.0, dom_bg),
+        ("GRID",          (0, 0), (-1, -1), 0.3, C_BORDER),
+        ("BOX",           (0, 0), (-1, -1), 0.6, C_BORDER),
+        ("LINEBELOW",     (0, 0), (-1, 0), 1.0, dom_bg),
         # Padding
-        ("TOPPADDING",   (0, 0), (-1, -1), 4),
+        ("TOPPADDING",    (0, 0), (-1, -1), 4),
         ("BOTTOMPADDING",(0, 0), (-1, -1), 4),
         ("LEFTPADDING",  (0, 0), (-1, -1), 5),
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
@@ -700,8 +695,10 @@ def build_pdf(session, template, answers_map, progress, attachments_by_question=
     for d_idx, domain in enumerate(domains):
         visible = [q for q in (domain.get("questions") or [])
                    if evaluate_show_if(q.get("show_if"), answers_map)]
+        # Hanya sembunyikan domain jika benar-benar tidak ada pertanyaan sama sekali
+        # (show_empty_domains=False hanya sembunyikan domain tanpa pertanyaan, bukan tanpa jawaban)
         answered, total, _ = _domain_progress(domain, answers_map)
-        if not config.get("show_empty_domains", False) and answered == 0 and total > 0:
+        if not config.get("show_empty_domains", True) and total == 0:
             continue
         _build_domain_section(
             story, domain, visible, answers_map, locale, brand, accent,

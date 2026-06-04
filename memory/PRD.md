@@ -52,6 +52,22 @@ Fase 0 Foundation → 1 Core POC (Claude + immersive 3D) → 2 Public Website �
 
 ---
 
+## Changelog - Phase 21 (Juni 2026)
+
+### Bug Fix — PDF hanya tampilkan domain header tanpa pertanyaan
+- **Root Cause 1**: `show_empty_domains` default `False` → domain dengan 0 jawaban dilewati seluruhnya
+- **Root Cause 2**: `✓` / `→` (Unicode) tidak didukung font Helvetica → rendering error silent per baris
+- **Root Cause 3**: `ParagraphStyle("ss", ...)` dibuat ulang tiap baris dengan nama sama → conflict
+- **Fix**:
+  - Default `show_empty_domains: True` (tampilkan semua domain dengan pertanyaan)
+  - Kondisi filter diubah: hanya sembunyikan domain yang benar-benar 0 pertanyaan
+  - Ganti symbol Unicode → ASCII (`Ya` / `-`)
+  - Style definitions dipindah ke luar loop
+  - Cell content list handling difix
+- **Hasil**: PDF KN3 (82 soal, 14 domain) naik dari 6KB → 17KB; semua pertanyaan muncul
+
+---
+
 ## Changelog - Phase 20 (Juni 2026)
 
 ### New Features — PDF Profesional & CMS PDF Config

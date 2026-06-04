@@ -26,7 +26,7 @@ DEFAULT_CONFIG = {
     "brand_color":        "#5B49C9",
     "accent_color":       "#1D7874",
     "footer_text":        "Dokumen ini bersifat rahasia dan hanya untuk penerima yang dituju",
-    "show_empty_domains": False,
+    "show_empty_domains": True,
     "show_notes":         True,
     "show_scoring":       True,
     "show_cover":         True,
