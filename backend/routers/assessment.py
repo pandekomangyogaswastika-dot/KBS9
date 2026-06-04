@@ -552,6 +552,7 @@ async def submit_session(token: str):
 @router.get("/{token}/export")
 async def export_pdf(token: str, locale: str = "id", include_ai: bool = False):
     """Export PDF — dapat diunduh kapan saja (sebelum maupun sesudah submit)."""
+    db = get_db()
     session = await _session_by_token(token)
     template = await _template_for(session)
     answers_list = serialize_list(await db.assessment_answers.find({"session_id": session["id"]}).to_list(1000))

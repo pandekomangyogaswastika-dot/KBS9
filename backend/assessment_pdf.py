@@ -695,10 +695,9 @@ def build_pdf(session, template, answers_map, progress, attachments_by_question=
     for d_idx, domain in enumerate(domains):
         visible = [q for q in (domain.get("questions") or [])
                    if evaluate_show_if(q.get("show_if"), answers_map)]
-        # Hanya sembunyikan domain jika benar-benar tidak ada pertanyaan sama sekali
-        # (show_empty_domains=False hanya sembunyikan domain tanpa pertanyaan, bukan tanpa jawaban)
-        answered, total, _ = _domain_progress(domain, answers_map)
-        if not config.get("show_empty_domains", True) and total == 0:
+        # Sembunyikan domain HANYA jika benar-benar tidak ada pertanyaan (bukan karena 0 jawaban)
+        # Pertanyaan SELALU ditampilkan meski belum dijawab (blank = "Belum dijawab")
+        if len(visible) == 0:
             continue
         _build_domain_section(
             story, domain, visible, answers_map, locale, brand, accent,
